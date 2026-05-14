@@ -20,7 +20,7 @@
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"
+        android:text="btn"
         tools:layout_editor_absoluteX="160dp"
         tools:layout_editor_absoluteY="398dp" />
 
