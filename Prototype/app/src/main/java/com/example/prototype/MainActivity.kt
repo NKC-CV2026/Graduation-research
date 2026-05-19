@@ -21,5 +21,14 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        var isBackground = false
+        binding.backgroundBtn.setOnClickListener {
+            isBackground = !isBackground
+            if(isBackground){
+                binding.backgroundBtn.text = getString(R.string.btn_onBackground)
+            }else{
+                binding.backgroundBtn.text = getString(R.string.btn_offBackground)
+            }
+        }
     }
 }
