@@ -2,6 +2,7 @@ package com.example.prototype
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.health.connect.datatypes.ExerciseCompletionGoal
 import android.location.Location
 import android.os.Bundle
 import android.os.Looper
