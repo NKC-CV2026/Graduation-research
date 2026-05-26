@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var location: Location
     private var isMonitoring = false
+    private lateinit var distanceChecker: DistanceChecker
     @RequiresPermission(anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private val LOCATION_PERMISSION_REQUEST_CODE = 100
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,6 +68,17 @@ class MainActivity : AppCompatActivity() {
 
 
         }
+        // DistanceChecker生成
+        distanceChecker = DistanceChecker()
+
+        // 実行開始
+        distanceChecker.startChecking()
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+
+        // 停止
+        distanceChecker.stopChecking()
     }
 }
 
