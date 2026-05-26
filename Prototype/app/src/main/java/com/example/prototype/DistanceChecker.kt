@@ -28,6 +28,10 @@ class DistanceChecker {
 
     val detectDistance = 10f //接近を検知する距離
 
+    var previousDistance = -1f //
+
+    var isChecks = true
+
     private val handler = android.os.Handler(Looper.getMainLooper())
 
 //    private val chackRunnable = object : Runnable //繰り返し実行する処理
@@ -46,16 +50,27 @@ class DistanceChecker {
 
             Log.d("DistanceCheck", "距離 = $distance")
 
-            if (distance <= detectDistance) { //一時停止地点に接近したとき
-                Log.d("DistanceCheck", "一時停止地点に接近しました！")
-            }else {
-                Log.d("DistanceCheck", "まだ遠いです！")
+            // 前回との比較
+            if (previousDistance != -1f) {
+                if (distance > previousDistance) {
+                    Log.d("DistanceCheck", "遠ざかっています")
+                    isChecks = false
+                    //ここで次の一時停止地点を探すようにする
+                }
             }
+
+            if (distance <= detectDistance) {
+                Log.d("DistanceCheck", "接近しました！")
+            }
+
+            previousDistance = distance
+
             nowLongtitude += 0.0003
             //nowLatitude += 0.0005
-            //handler.postDelayed(this, 5000) ５秒後にまた呼び出す
+            if (isChecks) {
+                handler.postDelayed(this, 5000) //５秒後にまた呼び出す
+            }
         }
-
     }
     // 開始
     fun startChecking() {
