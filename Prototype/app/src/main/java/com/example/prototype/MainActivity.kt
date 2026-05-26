@@ -2,7 +2,6 @@ package com.example.prototype
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
@@ -19,11 +18,12 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import  com.example.prototype.Location
+
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
+    private lateinit var location: Location
     private var isMonitoring = false
     @RequiresPermission(anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private val LOCATION_PERMISSION_REQUEST_CODE = 100
@@ -33,64 +33,40 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        locationCallback = object : LocationCallback(){
-            override fun onLocationResult(locationResult: LocationResult) {
-                for (location in locationResult.locations){
-                    Log.e("位置情報","緯度：${location.longitude}経度：${location.longitude}方位角${location.bearing}")
-                }
-            }
-        }
+
+        location = Location(this)
         binding.locationBtn.setOnClickListener() {
             isMonitoring = !isMonitoring
             if (isMonitoring){
-                startLocationUpdate()
+                if (ActivityCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        this,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    Log.e("位置情報", "権限が許可されてないよ")
+                    ActivityCompat.requestPermissions(
+                        this,
+                        arrayOf(
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                        ),
+                        LOCATION_PERMISSION_REQUEST_CODE
+                    )
+                    isMonitoring = false
+                    return@setOnClickListener
+                }
+                location.startLocationUpdate()
                 binding.locationBtn.text = "OFF"
             }else{
-                stopLocationonUpdate()
+                location.stopLocationonUpdate()
                 binding.locationBtn.text = "ON"
             }
 
+
         }
-
-
-    }
-    private fun startLocationUpdate(){
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ){
-            Log.e("位置情報","権限が許可されてないよ")
-            ActivityCompat.requestPermissions(
-                this,
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ),
-                LOCATION_PERMISSION_REQUEST_CODE
-            )
-            return
-        }
-        val locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY,
-            1000L
-        ).build()
-
-        fusedLocationClient.requestLocationUpdates(
-            locationRequest,
-            locationCallback,
-            Looper.getMainLooper()
-        )
-
-    }
-    private fun stopLocationonUpdate(){
-        fusedLocationClient.removeLocationUpdates(
-            locationCallback
-        )
     }
 }
 
