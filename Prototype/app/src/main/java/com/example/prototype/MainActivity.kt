@@ -2,7 +2,9 @@ package com.example.prototype
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.health.connect.datatypes.ExerciseRoute
 import android.os.Bundle
+import android.location.Location
 import android.os.Looper
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
@@ -18,11 +20,14 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import  com.example.prototype.Location
+import com.example.prototype.LocationGetter
+import com.example.prototype.NearStopSign
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+    private lateinit var locationGetter: LocationGetter
+    private lateinit var nearStopSign: NearStopSign
     private lateinit var location: Location
     private var isMonitoring = false
     private lateinit var distanceChecker: DistanceChecker
@@ -34,9 +39,10 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-        location = Location(this)
+        locationGetter = LocationGetter(this)
+        nearStopSign = NearStopSign()
         binding.locationBtn.setOnClickListener() {
+
             isMonitoring = !isMonitoring
             if (isMonitoring){
                 if (ActivityCompat.checkSelfPermission(
@@ -59,13 +65,14 @@ class MainActivity : AppCompatActivity() {
                     isMonitoring = false
                     return@setOnClickListener
                 }
-                location.startLocationUpdate()
+                locationGetter.startLocationUpdate()
                 binding.locationBtn.text = "OFF"
+
+
             }else{
-                location.stopLocationonUpdate()
+                locationGetter.stopLocationonUpdate()
                 binding.locationBtn.text = "ON"
             }
-
 
         }
         // DistanceChecker生成
