@@ -13,9 +13,12 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 
-class Location(
-    private val context: Context
+class LocationGetter(
+    private val context: Context,
 ) {
+    private var lat: Double = 35.12093
+    private var long: Double = 136.91254
+    private var bearing: Float = 190f
     private val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
     private val locationCallback =
 
@@ -25,6 +28,9 @@ class Location(
                 Log.e(
                     "位置情報","緯度：${location.latitude}経度：${location.longitude}方位角：${location.bearing}"
                 )
+                lat = location.latitude
+                long = location.longitude
+                bearing = location.bearing
             }
         }
     }
@@ -57,4 +63,15 @@ class Location(
             locationCallback
         )
     }
+    fun getLat(): Double{
+        return lat
+    }
+    fun getLong(): Double{
+        return long
+    }
+    fun getBearing(): Float{
+        return bearing
+    }
+
+
 }
