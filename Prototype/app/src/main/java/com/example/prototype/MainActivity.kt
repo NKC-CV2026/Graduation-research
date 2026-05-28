@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
 
         }
         // DistanceChecker生成
-        distanceChecker = DistanceChecker()
+        distanceChecker = DistanceChecker(this)
 
         // 実行開始
         distanceChecker.startChecking()
