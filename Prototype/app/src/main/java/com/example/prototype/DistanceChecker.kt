@@ -8,6 +8,8 @@ import android.location.Location
 import kotlinx.coroutines.Runnable
 import java.util.logging.Handler
 import android.media.MediaPlayer
+import android.os.Vibrator
+import android.os.VibrationEffect
 
 class DistanceChecker(private val context: Context) {
     val targetLatitude = 35.600000 //目的地緯度
@@ -22,8 +24,11 @@ class DistanceChecker(private val context: Context) {
 
     var isChecks = true
 
-    private var mediaPlayer: MediaPlayer? = null
+    private var mediaPlayer: MediaPlayer? = null //メディアプレイヤー
 
+    private var vibrator: Vibrator? = null //バイブレーション
+
+    val pattern = longArrayOf(0, 500, 300, 500) //バイブレーションパターン
 
     //将来的に消す
     private val handler = android.os.Handler(Looper.getMainLooper())
@@ -36,6 +41,8 @@ class DistanceChecker(private val context: Context) {
         mediaPlayer = MediaPlayer.create(context,R.raw.alert)
         //ループ再生するように
         mediaPlayer?.isLooping = true
+
+        vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
     }
     private val checkRunnable = object : Runnable {
@@ -58,6 +65,8 @@ class DistanceChecker(private val context: Context) {
                     Log.d("DistanceCheck", "遠ざかっています")
                     //音声アラート停止
                     mediaPlayer?.pause()
+                    //バイブレーション停止
+                    vibrator?.cancel()
                     isChecks = false
                     //ここで次の一時停止地点を探すようにする
                 }
@@ -68,6 +77,20 @@ class DistanceChecker(private val context: Context) {
                 //音声ファイルを開始時に戻し、再生
                 mediaPlayer?.seekTo(0)
                 mediaPlayer?.start()
+                //バイブレーション開始 (androidのバージョンによってコードが違うので分岐)
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    vibrator?.vibrate(
+                        VibrationEffect.createWaveform(
+                            longArrayOf(0, 500, 300, 500),
+                            0
+                        )
+                    )
+                } else {
+                    vibrator?.vibrate(
+                        longArrayOf(0, 500, 300, 500),
+                        0
+                    )
+                }
             }
 
             previousDistance = distance
