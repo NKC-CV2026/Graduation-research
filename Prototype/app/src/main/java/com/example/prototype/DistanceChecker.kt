@@ -12,8 +12,8 @@ import android.os.Vibrator
 import android.os.VibrationEffect
 
 class DistanceChecker(private val context: Context) {
-    val targetLatitude = 35.600000 //目的地緯度
-    val targetLongitude = 139.800000 //目的地経度
+    var targetLatitude = 35.600000 //目的地緯度
+    var targetLongitude = 139.800000 //目的地経度
 
     var nowLatitude = 35.600000 //現在地緯度
     var nowLongtitude = 139.799000 //現在地経度
@@ -95,9 +95,9 @@ class DistanceChecker(private val context: Context) {
 
             previousDistance = distance
 
-            //将来的に消す
-            nowLongtitude += 0.0003
-            //nowLatitude += 0.0005
+//            //将来的に消す
+//            nowLongtitude += 0.0003
+//            //nowLatitude += 0.0005
 
             //将来的に消す
             if (isChecks) {

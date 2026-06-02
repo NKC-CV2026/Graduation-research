@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.example.prototype.databinding.ActivityMainBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -22,13 +23,15 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.example.prototype.LocationGetter
 import com.example.prototype.NearStopSign
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var locationGetter: LocationGetter
     private lateinit var nearStopSign: NearStopSign
-    private lateinit var location: Location
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private var isMonitoring = false
     private lateinit var distanceChecker: DistanceChecker
     @RequiresPermission(anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
@@ -40,6 +43,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         locationGetter = LocationGetter(this)
+        // DistanceChecker生成
+        distanceChecker = DistanceChecker(this)
         nearStopSign = NearStopSign()
         binding.locationBtn.setOnClickListener() {
 
@@ -67,23 +72,55 @@ class MainActivity : AppCompatActivity() {
                 }
                 locationGetter.startLocationUpdate()
                 binding.locationBtn.text = "OFF"
+                lifecycleScope.launch {
+                    while (isMonitoring) {
+                        //近くの一時停止標識の配列の設定
+                        nearStopSign.setStopPoints()
+                        //一時停止の特定
+                        val nearrestStop = nearStopSign.matchStopSing(
+                            locationGetter.getLat(),
+                            locationGetter.getLong(),
+                            locationGetter.getBearing(),
+                            nearStopSign.stopPoints
+                        )
+
+                        if (nearrestStop == null) {
+                            delay(1000L)
+                            continue
+                        }
+
+                        //距離判定の値設定
+                        distanceChecker.targetLatitude = nearrestStop["lat"] as Double
+                        distanceChecker.targetLongitude = nearrestStop["long"] as Double
+                        distanceChecker.nowLatitude = locationGetter.getLat()
+                        distanceChecker.nowLongtitude = locationGetter.getLong()
 
 
+                        delay(1000L)
+//unrecoverably broken and will be disposed!
+                        //ボタン押して少ししたら出るエラークラッシュする
+                    }
+                }
+                // 距離判定実行開始
+                distanceChecker.startChecking()
             }else{
                 locationGetter.stopLocationonUpdate()
                 binding.locationBtn.text = "ON"
+                // 距離判定停止
+                distanceChecker.stopChecking()
             }
 
         }
-        // DistanceChecker生成
-        distanceChecker = DistanceChecker(this)
 
-        // 実行開始
-        distanceChecker.startChecking()
+
+
+    }
+    fun run(){
+
     }
     override fun onDestroy() {
         super.onDestroy()
-
+        locationGetter.stopLocationonUpdate()
         // 停止
         distanceChecker.stopChecking()
     }
