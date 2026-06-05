@@ -1,0 +1,11 @@
+--データベースを初期化、作成するSQL
+
+CREATE TABLE IF NOT EXISTS stop_signs (
+    id SERIAL PRIMARY KEY ,
+    jartic_id VARCHAR(32) UNIQUE ,
+    bearing INT ,
+    geom geography(Point, 4326)
+    --4326:楕円座標系を示す番号
+);
+
+CREATE INDEX IF NOT EXISTS idx_stop_sings_geom ON stop_signs USING gist(geom);

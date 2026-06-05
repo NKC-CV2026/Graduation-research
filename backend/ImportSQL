@@ -1,0 +1,30 @@
+--CSV取り込み用のSQL
+
+--インポートするためのCSVファイルのパス
+\set file_path '/tmp/points.csv'
+
+--CSVを取り込むための一時テーブル
+CREATE TEMPORARY TABLE temp_stop_signs (
+    jartic_id VARCHAR(32) ,
+    bearing INT ,
+    long DOUBLE PRECITION ,
+    lat DOUBLE PRECITION 
+)
+
+--コピー用のコマンドの設定
+\set copy_cmd '\\copy temp_stop_signs FROM \'' :file_path '\' WITH DELIMITER '','' CSV HEADER'
+
+--コピーコマンドの実行
+:copy_cmd
+
+--一時テーブルから実テーブルへの変換
+INSERT INTO stop_signs (jartic_id , bearing , geom)
+SELECT
+    jartic_id ,
+    bearing ,
+    ST_SetSRID(ST_MakePoint(long , lat) , 4326)::geography
+FROM temp_stop_signs
+ON CONFLICT (jartic_id) DO NOTHING; 
+
+-- TODO: ON CONFLICT DO UPDATEに変えてもいいかも
+
