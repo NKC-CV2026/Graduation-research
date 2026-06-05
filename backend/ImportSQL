@@ -25,3 +25,6 @@ SELECT
     ST_SetSRID(ST_MakePoint(long , lat) , 4326)::geography
 FROM temp_stop_signs
 ON CONFLICT (jartic_id) DO NOTHING; 
+
+-- TODO: ON CONFLICT DO UPDATEに変えてもいいかも
+
