@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="設定"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <!-- 音声 -->
+        <Switch
+            android:id="@+id/switchVoice"
+            android:text="音声通知"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- バイブレーション -->
+        <Switch
+            android:id="@+id/switchVibration"
+            android:text="バイブレーション"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- テスト -->
+        <Button
+            android:id="@+id/btnTest"
+            android:text="テスト実行"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!-- 距離設定 -->
+        <TextView
+            android:text="通知距離"
+            android:layout_marginTop="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <RadioGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/radioNear"
+                android:text="近い"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <RadioButton
+                android:id="@+id/radioFar"
+                android:text="遠い"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </RadioGroup>
+        <Button
+            android:id="@+id/btnrepot"
+            android:text="レポート表示"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+</ScrollView>
