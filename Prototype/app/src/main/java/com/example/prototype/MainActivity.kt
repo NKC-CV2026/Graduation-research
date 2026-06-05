@@ -39,13 +39,13 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         locationGetter = LocationGetter(this)
         // DistanceChecker生成
         distanceChecker = DistanceChecker(this)
         nearStopSign = NearStopSign()
+//        nearStopSign.setStopPoints(this)
         binding.locationBtn.setOnClickListener() {
 
             isMonitoring = !isMonitoring
@@ -75,7 +75,8 @@ class MainActivity : AppCompatActivity() {
                 lifecycleScope.launch {
                     while (isMonitoring) {
                         //近くの一時停止標識の配列の設定
-                        nearStopSign.setStopPoints()
+                        nearStopSign.setStopPoints(this@MainActivity)
+//                        Log.e("配列の確認","${nearStopSign.stopPoints}")
                         //一時停止の特定
                         val nearrestStop = nearStopSign.matchStopSing(
                             locationGetter.getLat(),
@@ -85,15 +86,19 @@ class MainActivity : AppCompatActivity() {
                         )
 
                         if (nearrestStop == null) {
+                            Log.e("一時停止なし","一時停止なし")
                             delay(1000L)
                             continue
                         }
 
-                        //距離判定の値設定
+                        //最寄りの一時停止の値設定
                         distanceChecker.targetLatitude = nearrestStop["lat"] as Double
                         distanceChecker.targetLongitude = nearrestStop["long"] as Double
+                        distanceChecker.isChecks = true // 地点特定完了通知
+                        //現在地の値設定
                         distanceChecker.nowLatitude = locationGetter.getLat()
                         distanceChecker.nowLongtitude = locationGetter.getLong()
+                        distanceChecker.run()
 
 
                         delay(1000L)
@@ -102,12 +107,12 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
                 // 距離判定実行開始
-                distanceChecker.startChecking()
+//                distanceChecker.startChecking()
             }else{
                 locationGetter.stopLocationonUpdate()
                 binding.locationBtn.text = "ON"
                 // 距離判定停止
-                distanceChecker.stopChecking()
+//                distanceChecker.stopChecking()
             }
 
         }
@@ -115,14 +120,12 @@ class MainActivity : AppCompatActivity() {
 
 
     }
-    fun run(){
 
-    }
     override fun onDestroy() {
         super.onDestroy()
         locationGetter.stopLocationonUpdate()
         // 停止
-        distanceChecker.stopChecking()
+//        distanceChecker.stopChecking()
     }
 }
 

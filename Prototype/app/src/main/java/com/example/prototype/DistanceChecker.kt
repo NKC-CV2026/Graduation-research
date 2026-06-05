@@ -45,73 +45,74 @@ class DistanceChecker(private val context: Context) {
         vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
     }
-    private val checkRunnable = object : Runnable {
-        override fun run() {
-            val results = FloatArray(1)
-            Location.distanceBetween(
-                nowLatitude,
-                nowLongtitude,
-                targetLatitude,
-                targetLongitude,
-                results
-            )
-            val distance = results[0]
+//    private val checkRunnable = object : Runnable {
+//    override
+    fun run() {
+        val results = FloatArray(1)
+        Location.distanceBetween(
+            nowLatitude,
+            nowLongtitude,
+            targetLatitude,
+            targetLongitude,
+            results
+        )
+        val distance = results[0]
 
-            Log.d("DistanceCheck", "距離 = $distance")
+        Log.d("DistanceCheck", "距離 = $distance")
 
-            // 前回との比較
-            if (previousDistance != -1f) {
-                if (distance > previousDistance) {
-                    Log.d("DistanceCheck", "遠ざかっています")
-                    //音声アラート停止
-                    mediaPlayer?.pause()
-                    //バイブレーション停止
-                    vibrator?.cancel()
-                    isChecks = false
-                    //ここで次の一時停止地点を探すようにする
-                }
+        // 前回との比較
+        if (previousDistance != -1f) {
+            if (distance > previousDistance) {
+                Log.d("DistanceCheck", "遠ざかっています")
+                //音声アラート停止
+                mediaPlayer?.pause()
+                //バイブレーション停止
+                vibrator?.cancel()
+                isChecks = false
+                //ここで次の一時停止地点を探すようにする
             }
+        }
 
-            if (distance <= detectDistance && isChecks) {
-                Log.d("DistanceCheck", "接近しました！")
-                //音声ファイルを開始時に戻し、再生
-                mediaPlayer?.seekTo(0)
-                mediaPlayer?.start()
-                //バイブレーション開始 (androidのバージョンによってコードが違うので分岐)
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                    vibrator?.vibrate(
-                        VibrationEffect.createWaveform(
-                            longArrayOf(0, 500, 300, 500),
-                            0
-                        )
-                    )
-                } else {
-                    vibrator?.vibrate(
+        if (distance <= detectDistance && isChecks) {
+            Log.d("DistanceCheck", "接近しました！")
+            //音声ファイルを開始時に戻し、再生
+            mediaPlayer?.seekTo(0)
+            mediaPlayer?.start()
+            //バイブレーション開始 (androidのバージョンによってコードが違うので分岐)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                vibrator?.vibrate(
+                    VibrationEffect.createWaveform(
                         longArrayOf(0, 500, 300, 500),
                         0
                     )
-                }
+                )
+            } else {
+                vibrator?.vibrate(
+                    longArrayOf(0, 500, 300, 500),
+                    0
+                )
             }
+        }
 
-            previousDistance = distance
+        previousDistance = distance
 
 //            //将来的に消す
 //            nowLongtitude += 0.0003
 //            //nowLatitude += 0.0005
 
-            //将来的に消す
-            if (isChecks) {
-                handler.postDelayed(this, 5000) //５秒後にまた呼び出す
-            }
-        }
+        //将来的に消す
+//            if (isChecks) {
+//                handler.postDelayed(this, 5000) //５秒後にまた呼び出す
+//            }
+//
     }
     // 開始　将来的に消す
-    fun startChecking() {
-        handler.post(checkRunnable)
-    }
-
-    // 停止
-    fun stopChecking() {
-        handler.removeCallbacks(checkRunnable)
-    }
+//    fun startChecking() {
+//        handler.post(checkRunnable)
+//    }
+//
+//    // 停止
+//    fun stopChecking() {
+//        handler.removeCallbacks(checkRunnable)
+//    }
 }
