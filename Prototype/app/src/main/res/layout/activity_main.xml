@@ -40,7 +40,7 @@
             android:layout_margin="16dp"
             android:background="@android:color/transparent"
             android:src="@android:drawable/ic_menu_preferences"
-            android:contentDescription="設定"
+            android:contentDescription="設定" />
 
 
 
