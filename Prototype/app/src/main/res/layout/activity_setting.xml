@@ -62,8 +62,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </RadioGroup>
+
         <Button
-            android:id="@+id/btnrepot"
+            android:id="@+id/btnReport"
             android:text="レポート表示"
             android:layout_marginTop="16dp"
             android:layout_width="match_parent"
