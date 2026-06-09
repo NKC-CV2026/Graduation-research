@@ -131,12 +131,7 @@ class DistanceChecker(private val context: Context) {
 //            }
 //
     }
-    fun getStopSuccsesCount(): Int{
-        return stopSuccsesCount
-    }
-    fun setStopSuccsesCount(arg: Int){
-        stopSuccsesCount = arg
-    }
+
     // 開始　将来的に消す
 //    fun startChecking() {
 //        handler.post(checkRunnable)
