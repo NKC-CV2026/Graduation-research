@@ -24,8 +24,7 @@
             android:layout_alignParentTop="true"
             android:clickable="true"
             android:focusable="true"
-            android:background="?attr/selectableItemBackground"
-            android:paintFlags="textUnderline"/>
+            android:background="?attr/selectableItemBackground"/>
 
         @android:drawable/ic_menu_preferences
 
