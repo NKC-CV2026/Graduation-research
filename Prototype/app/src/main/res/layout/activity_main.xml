@@ -1,20 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <!-- 左上：レポート -->
-
-
         <TextView
             android:id="@+id/btnReport"
             android:layout_width="wrap_content"
@@ -29,20 +24,9 @@
             android:clickable="true"
             android:focusable="true"
             android:background="?attr/selectableItemBackground"
-            android:paintFlags="underline" />
+            android:paintFlags="textUnderline"/>
 
-        <ImageButton
-            android:id="@+id/btnSetting"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="16dp"
-            android:background="@android:color/transparent"
-            android:src="@android:drawable/ic_menu_preferences"
-            android:contentDescription="設定" />
-
-
+        @android:drawable/ic_menu_preferences
 
         <Button
             android:id="@+id/locationBtn"
@@ -51,10 +35,7 @@
             android:layout_centerInParent="true"
             android:text="OFF"
             android:textSize="24sp"
-            android:background="#DDDDDD" />
-
-
-
+            android:background="#DDDDDD"/>
 
     </RelativeLayout>
 
