@@ -1,14 +1,14 @@
 package com.example.prototype
 import android.content.Context
 import android.location.Location
-import android.util.Log
-import androidx.annotation.UiContext
-import com.example.prototype.LocationGetter
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
+//import android.util.Log
+//import androidx.annotation.UiContext
+//import com.example.prototype.LocationGetter
+//import com.google.gson.Gson
+//import com.google.gson.JsonSyntaxException
 import org.json.JSONArray
-import java.io.File
-import java.io.IOException
+//import java.io.File
+//import java.io.IOException
 
 //data class
 
@@ -25,46 +25,20 @@ class NearStopSign() {
 //        val list: List<StopPointJson>
 //    )
     fun setStopPoints(context: Context){
-    val inputjson = context.resources.openRawResource( R.raw.outputstop)
-    val inputString = inputjson.bufferedReader().use { it.readText() }
-    val inputArray = JSONArray(inputString)
-    for (i in 0 ..< inputArray.length()){
-        val obj = inputArray.getJSONObject(i)
-        stopPoints.add(
-            mapOf(
-                "long" to obj.getDouble("lon"),
-                "lat" to obj.getDouble("lat"),
-                "bearing" to obj.getInt("az")
+        val inputjson = context.resources.openRawResource( R.raw.outputstop)
+        val inputString = inputjson.bufferedReader().use { it.readText() }
+        val inputArray = JSONArray(inputString)
+        stopPoints.clear()
+        for (i in 0 ..< inputArray.length()){
+            val obj = inputArray.getJSONObject(i)
+            stopPoints.add(
+                mapOf(
+                    "long" to obj.getDouble("lon"),
+                    "lat" to obj.getDouble("lat"),
+                    "bearing" to obj.getInt("az")
+                )
             )
-        )
-    }
-//        val gson = Gson()
-//        try {
-//            // JSON ファイルを読み込み（UTF-8）
-//            val jsonString = File("assets/outputstop.json").readText(Charsets.UTF_8)
-//            // JSON → データクラスに変換
-//            val stopPointsjson: StopPointJson = gson.fromJson(R, StopPointJson::class.java)
-//            stopPoints.add(
-//                mapOf(
-//                    "long" to stopPointsjson.long,
-//                    "lat" to stopPointsjson.lat,
-//                    "bearing" to stopPointsjson.bearing
-//                )
-//            )
-//        } catch (e: IOException){
-//            Log.e("ファイル読み込みエラー","${e.message}")
-//        }catch (e: JsonSyntaxException){
-//            Log.e("json形式エラー","${e.message}")
-//        }
-//        stopPoints.add(
-//            mapOf(
-//                "long" to 136.91254,
-//                "lat" to 35.12093,
-//                "bearing" to 190
-//            )
-//        )
-
-
+        }
     }
     private fun matchBearing(
         userBearing: Float,
@@ -102,6 +76,7 @@ class NearStopSign() {
     fun matchStopSing(lat: Double,long: Double,bearing: Float,stopPoints: List<Map<String, Any>>):Map<String, Any>?{
         var matchBearingPoints = matchBearing(bearing,stopPoints)
         if (matchBearingPoints.isEmpty()) return null
+
             return matchNearestStop(lat, long, matchBearingPoints)
 
     }

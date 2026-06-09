@@ -8,23 +8,25 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        tools:ignore="ExtraText">
 
         <!-- 左上：レポート -->
         <TextView
             android:id="@+id/btnReport"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_margin="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:minHeight="48dp"
             android:text="レポート"
             android:textColor="#2196F3"
             android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_margin="16dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackground"/>
+            android:textStyle="bold" />
 
         @android:drawable/ic_menu_preferences
 
@@ -33,9 +35,10 @@
             android:layout_width="300dp"
             android:layout_height="100dp"
             android:layout_centerInParent="true"
-            android:text="OFF"
-            android:textSize="24sp"
-            android:background="#DDDDDD"/>
+            android:background="#DDDDDD"
+            android:text="@string/btn_offLocation"
+            android:textColor="@color/white"
+            android:textSize="24sp" />
 
     </RelativeLayout>
 
