@@ -2,27 +2,27 @@ package com.example.prototype
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.health.connect.datatypes.ExerciseRoute
+//import android.health.connect.datatypes.ExerciseRoute
 import android.os.Bundle
-import android.location.Location
-import android.os.Looper
+//import android.location.Location
+//import android.os.Looper
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+//import androidx.core.view.ViewCompat
+//import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.prototype.databinding.ActivityMainBinding
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.example.prototype.LocationGetter
-import com.example.prototype.NearStopSign
+//import com.google.android.gms.location.FusedLocationProviderClient
+//import com.google.android.gms.location.LocationCallback
+//import com.google.android.gms.location.LocationRequest
+//import com.google.android.gms.location.LocationResult
+//import com.google.android.gms.location.LocationServices
+//import com.google.android.gms.location.Priority
+//import com.example.prototype.LocationGetter
+//import com.example.prototype.NearStopSign
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -47,9 +47,9 @@ class MainActivity : AppCompatActivity() {
         nearStopSign = NearStopSign()
 //        nearStopSign.setStopPoints(this)
         binding.locationBtn.setOnClickListener() {
-
             isMonitoring = !isMonitoring
             if (isMonitoring){
+                distanceChecker.stopSuccsesCount = 0
                 if (ActivityCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_FINE_LOCATION
@@ -71,17 +71,25 @@ class MainActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
                 locationGetter.startLocationUpdate()
-                binding.locationBtn.text = "OFF"
+                binding.locationBtn.text = getString(R.string.btn_onLocation)
                 lifecycleScope.launch {
                     while (isMonitoring) {
                         //近くの一時停止標識の配列の設定
                         nearStopSign.setStopPoints(this@MainActivity)
 //                        Log.e("配列の確認","${nearStopSign.stopPoints}")
+                        var nowLat = locationGetter.getLat()
+                        var nowLong = locationGetter.getLong()
+                        var nowBearing = locationGetter.getBearing()
+                        if (nowLat == null || nowLong == null || nowBearing == null) {
+                            Log.e("現在地なし","現在地なし")
+                            delay(1000L)
+                            continue
+                        }
                         //一時停止の特定
                         val nearrestStop = nearStopSign.matchStopSing(
-                            locationGetter.getLat(),
-                            locationGetter.getLong(),
-                            locationGetter.getBearing(),
+                            nowLat,
+                            nowLong,
+                            nowBearing,
                             nearStopSign.stopPoints
                         )
 
@@ -98,6 +106,10 @@ class MainActivity : AppCompatActivity() {
                         //現在地の値設定
                         distanceChecker.nowLatitude = locationGetter.getLat()
                         distanceChecker.nowLongtitude = locationGetter.getLong()
+//                       速度受け渡し
+                        distanceChecker.nowSpeed = locationGetter.getSpeed()
+                        Log.e("test","${locationGetter.getSpeed()}")
+//                        距離判定実行
                         distanceChecker.run()
 
 
@@ -110,7 +122,8 @@ class MainActivity : AppCompatActivity() {
 //                distanceChecker.startChecking()
             }else{
                 locationGetter.stopLocationonUpdate()
-                binding.locationBtn.text = "ON"
+                binding.locationBtn.text = getString(R.string.btn_offLocation)
+                Log.e("test","${distanceChecker.stopSuccsesCount}")
                 // 距離判定停止
 //                distanceChecker.stopChecking()
             }

@@ -16,9 +16,11 @@ import com.google.android.gms.location.Priority
 class LocationGetter(
     private val context: Context,
 ) {
-    private var lat: Double = 35.12093
-    private var long: Double = 136.91254
-    private var bearing: Float = 190f
+    private var lat: Double? = null
+    private var long: Double? = null
+    private var bearing: Float? = null
+
+    private var speed: Float = 5f
     private val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
     private val locationCallback =
 
@@ -31,6 +33,7 @@ class LocationGetter(
                 lat = location.latitude
                 long = location.longitude
                 bearing = location.bearing
+                speed = location.speed
             }
         }
     }
@@ -63,15 +66,17 @@ class LocationGetter(
             locationCallback
         )
     }
-    fun getLat(): Double{
+    fun getLat(): Double?{
         return lat
     }
-    fun getLong(): Double{
+    fun getLong(): Double?{
         return long
     }
-    fun getBearing(): Float{
+    fun getBearing(): Float?{
         return bearing
     }
-
+    fun getSpeed(): Float{
+        return speed
+    }
 
 }
