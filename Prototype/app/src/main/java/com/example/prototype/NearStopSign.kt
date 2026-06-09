@@ -75,9 +75,9 @@ class NearStopSign() {
     //最寄りの一時停止返す関数
     fun matchStopSing(lat: Double,long: Double,bearing: Float,stopPoints: List<Map<String, Any>>):Map<String, Any>?{
         var matchBearingPoints = matchBearing(bearing,stopPoints)
-        if (matchBearingPoints.isEmpty()) return null
-
-            return matchNearestStop(lat, long, matchBearingPoints)
-
+        if (matchBearingPoints.isEmpty()){
+            return null
+        }
+        return matchNearestStop(lat, long, matchBearingPoints)
     }
 }
