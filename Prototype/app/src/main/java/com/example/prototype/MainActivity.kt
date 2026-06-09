@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
             isMonitoring = !isMonitoring
             if (isMonitoring){
                 distanceChecker.stopSuccsesCount = 0
+                distanceChecker.stopPointsCount = 0
                 if (ActivityCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_FINE_LOCATION
@@ -123,7 +124,8 @@ class MainActivity : AppCompatActivity() {
             }else{
                 locationGetter.stopLocationonUpdate()
                 binding.locationBtn.text = getString(R.string.btn_offLocation)
-                Log.e("test","${distanceChecker.stopSuccsesCount}")
+                Log.e("test","停止した一時停止${distanceChecker.stopSuccsesCount}")
+                Log.e("test","接近した一時停止${distanceChecker.stopPointsCount}")
                 // 距離判定停止
 //                distanceChecker.stopChecking()
             }

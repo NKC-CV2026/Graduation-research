@@ -15,6 +15,7 @@ import com.example.prototype.LocationGetter
 
 class DistanceChecker(private val context: Context) {
     var stopSuccsesCount = 0
+    var stopPointsCount = 0
 
     var targetLatitude: Double? = null //目的地緯度
     var targetLongitude: Double? = null //目的地経度
@@ -90,6 +91,7 @@ class DistanceChecker(private val context: Context) {
 
         if (distance <= detectDistance && isChecks) {
             if (distance <= 30f){
+                stopPointsCount++
                 if (nowSpeed <= 10f){
                     stopSuccsesCount++
                     Log.e("test","一時停止")
