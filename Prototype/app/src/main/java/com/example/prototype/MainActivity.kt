@@ -1,6 +1,7 @@
 package com.example.prototype
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 //import android.health.connect.datatypes.ExerciseRoute
 import android.os.Bundle
@@ -132,6 +133,15 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+        binding.btnReport.setOnClickListener {
+            val intent = Intent(
+                this,
+                ReportActivity::class.java
+            )
+            intent.putExtra("STOP_SUCCSES_COUNT",distanceChecker.stopSuccsesCount)
+            intent.putExtra("STOP_POINTS_COUNT",distanceChecker.stopPointsCount)
+            startActivity(intent)
+        }
 
 
     }

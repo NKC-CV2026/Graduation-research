@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <!-- 正確な位置(GPS) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- おおよその位置(Wi-Fiやネットワーク) -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- backgroundでの位置情報 -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- バイブレーション -->
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <application
         android:allowBackup="true"
@@ -12,6 +17,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Prototype">
         <activity
+            android:name=".ReportActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -20,19 +28,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
-
     </application>
-    <!-- 正確な位置(GPS) -->
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-    <!-- おおよその位置(Wi-Fiやネットワーク) -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
-    <!-- backgroundでの位置情報   -->
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-
-    <!-- バイブレーション -->
-    <uses-permission android:name="android.permission.VIBRATE"/>
 </manifest>
