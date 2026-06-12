@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat
 //import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.prototype.databinding.ActivityMainBinding
+import com.google.android.gms.common.FirstPartyScopes
 //import com.google.android.gms.location.FusedLocationProviderClient
 //import com.google.android.gms.location.LocationCallback
 //import com.google.android.gms.location.LocationRequest
@@ -25,6 +26,9 @@ import com.example.prototype.databinding.ActivityMainBinding
 //import com.example.prototype.NearStopSign
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.appcompat.app.AlertDialog
+import android.widget.Button
+import android.widget.RadioButton
 
 
 class MainActivity : AppCompatActivity() {
@@ -34,6 +38,7 @@ class MainActivity : AppCompatActivity() {
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
     private var isMonitoring = false
     private lateinit var distanceChecker: DistanceChecker
+    private lateinit var checker: FirstLaunchCheck
     @RequiresPermission(anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private val LOCATION_PERMISSION_REQUEST_CODE = 100
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +46,60 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        checker = FirstLaunchCheck(this)
+        //テスト中のみ(毎回初回起動判定にする)
+        checker.resetFirstLaunch()
+        if(checker.isFirstLaunch()) {
+            val dialogView = layoutInflater.inflate(
+                R.layout.dialog_mode_settings,
+                null
+            )
+            val dialog =
+                AlertDialog.Builder(this)
+                    .setView(dialogView)
+                    .create()
+            dialog.setCancelable(false)
+            val radioMusic = dialogView.findViewById<RadioButton>(
+                R.id.radioMusic
+            )
+
+            val radioVibe = dialogView.findViewById<RadioButton>(
+                R.id.radioVibe
+            )
+            //未選択を防ぐために音声モードを最初に選択させてる
+            radioMusic.isChecked = true
+
+            radioMusic.setOnClickListener {
+                radioVibe.isChecked = false
+            }
+
+
+            radioVibe.setOnClickListener {
+                radioMusic.isChecked = false
+            }
+            val btnOk = dialogView.findViewById<Button>(
+                R.id.btnOk
+            )
+            btnOk.setOnClickListener {
+                //ラジオボタンの洗濯したもの取得(現在はログになってます)
+                if (radioMusic.isChecked) {
+
+                    Log.e("MODE", "音声モード")
+
+                } else if (radioVibe.isChecked) {
+
+                    Log.e("MODE", "バイブモード")
+
+                } else {
+
+                    Log.e("MODE", "未選択")
+
+                }
+                dialog.dismiss()
+                checker.setFirstLaunchFinished()
+            }
+            dialog.show()
+        }
         locationGetter = LocationGetter(this)
         // DistanceChecker生成
         distanceChecker = DistanceChecker(this)
