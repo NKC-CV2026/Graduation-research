@@ -1,0 +1,5 @@
+backend/infra/**/.terraform/
+backend/infra/**/*.tfstate
+backend/infra/**/*.tfstate.*
+backend/infra/**/*.tfplan
+backend/infra/**/crash.log

@@ -1,0 +1,14 @@
+aws_region                    = "ap-northeast-3"
+github_org                    = "NKC-CV2026"
+github_repo                   = "Graduation-research"
+github_default_branch         = "main"
+terraform_state_bucket_prefix = "gr9-terraform-state"
+# 初回 apply 後に output の suffix を転記して固定化できます
+# terraform_state_bucket_suffix = "a1b2c3d4"
+
+tags = {
+  Project    = "gr9"
+  ManagedBy  = "Terraform"
+  Scope      = "bootstrap"
+  Repository = "NKC-CV2026/Graduation-research"
+}
