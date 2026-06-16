@@ -1,5 +1,6 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -39,6 +40,14 @@
             android:text="@string/btn_offLocation"
             android:textColor="@color/white"
             android:textSize="24sp" />
+
+        <ImageView
+            android:id="@+id/btnSettings"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginEnd="0dp"
+            android:background="@drawable/setting" />
 
     </RelativeLayout>
 
