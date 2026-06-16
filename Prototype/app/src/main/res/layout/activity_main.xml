@@ -1,4 +1,5 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
@@ -17,10 +18,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"
             android:layout_margin="16dp"
             android:layout_marginStart="16dp"
-            android:layout_marginBottom="647dp"
+            android:layout_marginTop="16dp"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true"
@@ -41,6 +42,17 @@
             android:text="@string/btn_offLocation"
             android:textColor="@color/white"
             android:textSize="24sp" />
+
+        <ImageButton
+            android:id="@+id/btnSettings"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="0dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/setting" />
 
     </RelativeLayout>
 
