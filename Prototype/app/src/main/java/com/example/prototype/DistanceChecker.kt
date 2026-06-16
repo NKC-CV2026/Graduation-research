@@ -90,9 +90,9 @@ class DistanceChecker(private val context: Context) {
         }
 
         if (distance <= detectDistance && isChecks) {
-            if (distance <= 30f){
+            if (distance <= 5f){
                 stopPointsCount++
-                if (nowSpeed <= 10f){
+                if (nowSpeed <= 5f){
                     stopSuccsesCount++
                     Log.e("test","一時停止")
                 }

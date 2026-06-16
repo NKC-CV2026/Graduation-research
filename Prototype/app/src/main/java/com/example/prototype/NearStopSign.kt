@@ -33,6 +33,7 @@ class NearStopSign() {
             val obj = inputArray.getJSONObject(i)
             stopPoints.add(
                 mapOf(
+                    "uniqueKey" to obj.getInt("uniqueKey"),
                     "long" to obj.getDouble("lon"),
                     "lat" to obj.getDouble("lat"),
                     "bearing" to obj.getInt("az")
