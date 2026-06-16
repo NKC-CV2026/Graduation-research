@@ -191,6 +191,57 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+        binding.btnSettings.setOnClickListener {
+            val dialogView = layoutInflater.inflate(
+                R.layout.dialog_mode_settings,
+                null
+            )
+            val dialog =
+                AlertDialog.Builder(this)
+                    .setView(dialogView)
+                    .create()
+            dialog.setCancelable(false)
+            val radioMusic = dialogView.findViewById<RadioButton>(
+                R.id.radioMusic
+            )
+
+            val radioVibe = dialogView.findViewById<RadioButton>(
+                R.id.radioVibe
+            )
+            //未選択を防ぐために音声モードを最初に選択させてる
+            radioMusic.isChecked = true
+
+            radioMusic.setOnClickListener {
+                radioVibe.isChecked = false
+            }
+
+
+            radioVibe.setOnClickListener {
+                radioMusic.isChecked = false
+            }
+            val btnOk = dialogView.findViewById<Button>(
+                R.id.btnOk
+            )
+            btnOk.setOnClickListener {
+                //ラジオボタンの洗濯したもの取得(現在はログになってます)
+                if (radioMusic.isChecked) {
+
+                    Log.e("MODE", "音声モード")
+
+                } else if (radioVibe.isChecked) {
+
+                    Log.e("MODE", "バイブモード")
+
+                } else {
+
+                    Log.e("MODE", "未選択")
+
+                }
+                dialog.dismiss()
+            }
+            dialog.show()
+        }
+
 
 
     }
