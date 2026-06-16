@@ -193,3 +193,42 @@ resource "aws_iam_role_policy_attachment" "apply_state_access" {
   role       = aws_iam_role.terraform_apply.name
   policy_arn = aws_iam_policy.terraform_state_access.arn
 }
+
+resource "aws_ecr_repository" "backend_app" {
+  name                 = var.backend_app_ecr_repository_name
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+
+  encryption_configuration {
+    encryption_type = "AES256"
+  }
+
+  tags = merge(var.tags, {
+    Name = var.backend_app_ecr_repository_name
+  })
+}
+
+resource "aws_ecr_lifecycle_policy" "backend_app" {
+  repository = aws_ecr_repository.backend_app.name
+
+  policy = jsonencode({
+    rules = [
+      {
+        rulePriority = 1
+        description  = "Expire untagged images after 7 days"
+        selection = {
+          tagStatus   = "untagged"
+          countType   = "sinceImagePushed"
+          countUnit   = "days"
+          countNumber = 7
+        }
+        action = {
+          type = "expire"
+        }
+      }
+    ]
+  })
+}

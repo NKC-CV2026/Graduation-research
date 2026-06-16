@@ -36,3 +36,13 @@ output "bootstrap_backend_config_hint" {
     key    = "bootstrap/terraform.tfstate"
   }
 }
+
+output "backend_app_ecr_repository_name" {
+  description = "ECR repository name for the backend application image."
+  value       = aws_ecr_repository.backend_app.name
+}
+
+output "backend_app_ecr_repository_url" {
+  description = "ECR repository URL for the backend application image."
+  value       = aws_ecr_repository.backend_app.repository_url
+}

@@ -46,6 +46,12 @@ variable "terraform_state_bucket_force_destroy" {
   default     = false
 }
 
+variable "backend_app_ecr_repository_name" {
+  description = "ECR repository name used for the backend application image."
+  type        = string
+  default     = "gr9-backend-app"
+}
+
 variable "tags" {
   description = "Common tags applied to bootstrap resources."
   type        = map(string)

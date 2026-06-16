@@ -5,6 +5,7 @@
 ## 作成するもの
 
 - Terraform state 用 S3 bucket
+- backend app 用 ECR repository
 - GitHub Actions OIDC provider
 - PR 用 `terraform-plan` IAM role
 - `main` push 用 `terraform-apply` IAM role
@@ -41,6 +42,7 @@ apply 後に以下を控えてください。
 
 - `terraform_state_bucket_name`
 - `terraform_state_bucket_suffix`
+- `backend_app_ecr_repository_url`
 - `terraform_plan_role_arn`
 - `terraform_apply_role_arn`
 
