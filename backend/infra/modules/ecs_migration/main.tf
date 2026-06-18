@@ -33,11 +33,24 @@ data "aws_iam_policy_document" "execution_secret_access" {
   }
 
   statement {
+    sid    = "DecryptDbSecretViaSecretsManager"
     effect = "Allow"
     actions = [
       "kms:Decrypt",
     ]
     resources = ["*"]
+
+    condition {
+      test     = "StringEquals"
+      variable = "kms:ViaService"
+      values   = ["secretsmanager.${var.region}.amazonaws.com"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "kms:EncryptionContext:SecretARN"
+      values   = [var.db_secret_arn]
+    }
   }
 }
 
