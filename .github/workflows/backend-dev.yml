@@ -246,16 +246,41 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
           role-to-assume: ${{ vars.TERRAFORM_BOOTSTRAP_APPLY_ROLE_ARN }}
 
+      - name: Probe Latest Image Digest
+        id: probe
+        env:
+          IMAGE_REPOSITORY_URL: ${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          REPOSITORY_NAME="${IMAGE_REPOSITORY_URL##*/}"
+          set +e
+          IMAGE_DIGEST=$(aws ecr describe-images \
+            --region "$AWS_REGION" \
+            --repository-name "$REPOSITORY_NAME" \
+            --image-ids imageTag=latest \
+            --query 'imageDetails[0].imageDigest' \
+            --output text)
+          STATUS=$?
+          set -e
+
+          if [ "$STATUS" -eq 0 ] && [ -n "$IMAGE_DIGEST" ] && [ "$IMAGE_DIGEST" != "None" ]; then
+            echo "latest_exists=true" >> "$GITHUB_OUTPUT"
+            echo "latest_digest=$IMAGE_DIGEST" >> "$GITHUB_OUTPUT"
+          else
+            echo "latest_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Login to ECR
-        if: needs.changes.outputs.app_changed == 'true'
+        if: needs.changes.outputs.app_changed == 'true' || steps.probe.outputs.latest_exists != 'true'
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Setup Docker Buildx
-        if: needs.changes.outputs.app_changed == 'true'
+        if: needs.changes.outputs.app_changed == 'true' || steps.probe.outputs.latest_exists != 'true'
         uses: docker/setup-buildx-action@v3
 
       - name: Build and Push Image
-        if: needs.changes.outputs.app_changed == 'true'
+        if: needs.changes.outputs.app_changed == 'true' || steps.probe.outputs.latest_exists != 'true'
+        id: build_push
         uses: docker/build-push-action@v6
         with:
           context: backend/app
@@ -272,15 +297,12 @@ jobs:
         id: image
         env:
           IMAGE_REPOSITORY_URL: ${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}
-          AWS_REGION: ${{ vars.AWS_REGION }}
         run: |
-          REPOSITORY_NAME="${IMAGE_REPOSITORY_URL##*/}"
-          IMAGE_DIGEST=$(aws ecr describe-images \
-            --region "$AWS_REGION" \
-            --repository-name "$REPOSITORY_NAME" \
-            --image-ids imageTag=latest \
-            --query 'imageDetails[0].imageDigest' \
-            --output text)
+          if [ "${{ needs.changes.outputs.app_changed }}" = "true" ] || [ "${{ steps.probe.outputs.latest_exists }}" != "true" ]; then
+            IMAGE_DIGEST="${{ steps.build_push.outputs.digest }}"
+          else
+            IMAGE_DIGEST="${{ steps.probe.outputs.latest_digest }}"
+          fi
 
           if [ -z "$IMAGE_DIGEST" ] || [ "$IMAGE_DIGEST" = "None" ]; then
             echo "failed to resolve digest for ${IMAGE_REPOSITORY_URL}:latest" >&2
