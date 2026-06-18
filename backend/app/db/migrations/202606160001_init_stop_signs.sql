@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS stop_signs (
     geom geography(Point, 4326)
 );
 
-CREATE INDEX IF NOT EXISTS idx_stop_sings_geom ON stop_signs USING gist(geom);
+CREATE INDEX IF NOT EXISTS idx_stop_signs_geom ON stop_signs USING gist(geom);
 
 GRANT USAGE ON SCHEMA public TO gr9app;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO gr9app;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO gr9app;

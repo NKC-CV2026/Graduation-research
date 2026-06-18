@@ -15,6 +15,7 @@
 
 - DB / API / migration task を dev 環境としてまとめて構成する
 - GitHub Actions から Docker build / push 後に dev をデプロイできる状態にする
+- Lambda と ECS migration task の CPU architecture は `arm64` を前提にしています
 
 ## 現時点の割り切り
 
@@ -69,8 +70,8 @@ Repository Variables に次を設定します。
 - DB は外部公開しません。後続の app / Lambda から同一 VPC 内で接続する前提です
 - DB への ingress は `app_security_group_id` からの 5432/TCP のみです
 - private subnet には NAT を置かないため、ECR / Logs / S3 などは VPC endpoint 経由で利用します
-- migration task も IAM DB authentication を使い、アプリ実行時は `gr9app` + IAM DB authentication を使う前提です
-- migration task の `DB_USER` は現状 `gr9admin` を前提にしているため、この user が IAM DB authentication を使えることが前提です
+- migration task は初回 bootstrap deadlock を避けるため、master user の password を使って接続します
+- app runtime は `gr9app` + IAM DB authentication を使う前提です
 - `serverless_min_acu = 0` は Aurora PostgreSQL の engine version とリージョンの組み合わせ依存です
 - もし `MinCapacity=0` が未対応なら `0.5` に上げてください
 - migration 方針は `backend/app/MIGRATION.md` を参照してください

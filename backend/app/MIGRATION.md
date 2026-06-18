@@ -46,6 +46,6 @@ DB schema の初期化と更新は Terraform ではなく app 側で管理しま
 ## 認証の前提
 
 - app 本体は `gr9app` と IAM DB authentication を使います
-- migration task も IAM DB authentication を使います
-- そのため migration を実行する DB user は、事前に `rds_iam` を使える状態である必要があります
-- 現状の Terraform では migration task の `DB_USER` は `gr9admin` を前提にしています
+- migration task は初回 bootstrap deadlock を避けるため、master user の password を使って接続します
+- その master password は Aurora が Secrets Manager に保持するものだけを利用します
+- migration 内で `gr9app` を作成し、`rds_iam` を付与する前提です

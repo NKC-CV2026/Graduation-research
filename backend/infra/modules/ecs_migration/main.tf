@@ -19,8 +19,25 @@ data "aws_iam_policy_document" "task_db_connect" {
     ]
     resources = [
       "arn:aws:rds-db:${var.region}:${var.account_id}:dbuser:${var.db_cluster_resource_id}/${var.app_db_user}",
-      "arn:aws:rds-db:${var.region}:${var.account_id}:dbuser:${var.db_cluster_resource_id}/${var.migration_db_user}",
     ]
+  }
+}
+
+data "aws_iam_policy_document" "execution_secret_access" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "secretsmanager:GetSecretValue",
+    ]
+    resources = [var.db_secret_arn]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "kms:Decrypt",
+    ]
+    resources = ["*"]
   }
 }
 
@@ -53,6 +70,12 @@ resource "aws_iam_role" "execution" {
 resource "aws_iam_role_policy_attachment" "execution_managed" {
   role       = aws_iam_role.execution.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+}
+
+resource "aws_iam_role_policy" "execution_secret_access" {
+  name   = "${var.name_prefix}-ecs-secret-access"
+  role   = aws_iam_role.execution.id
+  policy = data.aws_iam_policy_document.execution_secret_access.json
 }
 
 resource "aws_iam_role" "task" {
@@ -97,6 +120,12 @@ resource "aws_ecs_task_definition" "this" {
           value = value
         }
       ]
+      secrets = [
+        {
+          name      = "DB_PASSWORD"
+          valueFrom = "${var.db_secret_arn}:password::"
+        }
+      ]
       logConfiguration = {
         logDriver = "awslogs"
         options = {
@@ -110,7 +139,7 @@ resource "aws_ecs_task_definition" "this" {
 
   runtime_platform {
     operating_system_family = "LINUX"
-    cpu_architecture        = "X86_64"
+    cpu_architecture        = "ARM64"
   }
 
   tags = merge(var.tags, {

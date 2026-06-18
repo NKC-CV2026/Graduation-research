@@ -51,12 +51,12 @@ func Load() (Config, error) {
 		return Config{}, err
 	}
 
-	maxConnLifetimeMinutes, err := intFromEnv("DB_MAX_CONN_LIFETIME_MINUTES", 30)
+	maxConnLifetimeMinutes, err := intFromEnv("DB_MAX_CONN_LIFETIME_MINUTES", 10)
 	if err != nil {
 		return Config{}, err
 	}
 
-	maxConnIdleMinutes, err := intFromEnv("DB_MAX_CONN_IDLE_MINUTES", 5)
+	maxConnIdleMinutes, err := intFromEnv("DB_MAX_CONN_IDLE_MINUTES", 2)
 	if err != nil {
 		return Config{}, err
 	}

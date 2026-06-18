@@ -84,7 +84,7 @@ module "ecs_migration" {
   security_group_ids     = [module.network.app_security_group_id]
   db_cluster_resource_id = module.aurora_postgres.cluster_resource_id
   app_db_user            = var.app_db_user
-  migration_db_user      = var.master_username
+  db_secret_arn          = module.aurora_postgres.master_user_secret_arn
   cpu                    = var.migration_task_cpu
   memory                 = var.migration_task_memory
   environment_variables = {
@@ -93,7 +93,7 @@ module "ecs_migration" {
     DB_PORT             = tostring(module.aurora_postgres.port)
     DB_NAME             = module.aurora_postgres.database_name
     DB_USER             = var.master_username
-    DB_IAM_AUTH         = "true"
+    DB_IAM_AUTH         = "false"
     DB_SSL_MODE         = "require"
     ATLAS_BINARY_PATH   = "/usr/local/bin/atlas"
     ATLAS_MIGRATION_DIR = "file:///app/db/migrations"

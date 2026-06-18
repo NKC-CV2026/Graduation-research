@@ -131,13 +131,13 @@ variable "migration_task_memory" {
 variable "enable_secretsmanager_endpoint" {
   description = "Whether to create a Secrets Manager VPC endpoint for the migration task."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "enable_kms_endpoint" {
   description = "Whether to create a KMS VPC endpoint for the migration task."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "tags" {

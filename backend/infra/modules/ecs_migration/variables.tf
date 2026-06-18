@@ -38,8 +38,8 @@ variable "app_db_user" {
   type        = string
 }
 
-variable "migration_db_user" {
-  description = "Database username used by the migration task. This user must already be able to use IAM DB authentication."
+variable "db_secret_arn" {
+  description = "Secrets Manager ARN for the master password secret used by the migration task."
   type        = string
 }
 

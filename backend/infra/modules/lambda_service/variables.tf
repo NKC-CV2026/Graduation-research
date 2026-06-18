@@ -39,7 +39,7 @@ variable "timeout" {
 variable "architecture" {
   description = "Lambda architecture."
   type        = string
-  default     = "x86_64"
+  default     = "arm64"
 }
 
 variable "log_retention_in_days" {
