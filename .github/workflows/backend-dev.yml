@@ -236,8 +236,6 @@ jobs:
       id-token: write
     outputs:
       image_uri: ${{ steps.image.outputs.image_uri }}
-    env:
-      IMAGE_TAG: sha-${{ github.sha }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -256,18 +254,8 @@ jobs:
         if: needs.changes.outputs.app_changed == 'true'
         uses: docker/setup-buildx-action@v3
 
-      - name: Default Image URI
-        id: image
-        env:
-          IMAGE_URI_LATEST: ${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}:latest
-        run: echo "image_uri=$IMAGE_URI_LATEST" >> "$GITHUB_OUTPUT"
-
       - name: Build and Push Image
         if: needs.changes.outputs.app_changed == 'true'
-        working-directory: backend/app
-        env:
-          IMAGE_URI: ${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}:${{ env.IMAGE_TAG }}
-          IMAGE_URI_LATEST: ${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}:latest
         uses: docker/build-push-action@v6
         with:
           context: backend/app
@@ -275,10 +263,31 @@ jobs:
           platforms: linux/arm64
           provenance: false
           tags: |
-            ${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}:${{ env.IMAGE_TAG }}
+            ${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}:sha-${{ github.sha }}
             ${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Resolve Digest Image URI
+        id: image
+        env:
+          IMAGE_REPOSITORY_URL: ${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          REPOSITORY_NAME="${IMAGE_REPOSITORY_URL##*/}"
+          IMAGE_DIGEST=$(aws ecr describe-images \
+            --region "$AWS_REGION" \
+            --repository-name "$REPOSITORY_NAME" \
+            --image-ids imageTag=latest \
+            --query 'imageDetails[0].imageDigest' \
+            --output text)
+
+          if [ -z "$IMAGE_DIGEST" ] || [ "$IMAGE_DIGEST" = "None" ]; then
+            echo "failed to resolve digest for ${IMAGE_REPOSITORY_URL}:latest" >&2
+            exit 1
+          fi
+
+          echo "image_uri=${IMAGE_REPOSITORY_URL}@${IMAGE_DIGEST}" >> "$GITHUB_OUTPUT"
 
   deploy-dev:
     name: Apply Dev and Run Migration
@@ -330,7 +339,7 @@ jobs:
         run: terraform init -input=false
 
       - name: Terraform Apply
-        run: terraform apply -input=false -auto-approve -no-color -var "app_image_uri=${{ needs.prepare-image.outputs.image_uri || format('{0}:latest', vars.BACKEND_APP_ECR_REPOSITORY_URL) }}"
+        run: terraform apply -input=false -auto-approve -no-color -var "app_image_uri=${{ needs.prepare-image.outputs.image_uri }}"
 
       - name: Capture Terraform Outputs
         id: tf
