@@ -1,0 +1,451 @@
+name: Backend Dev
+
+on:
+  pull_request:
+    paths:
+      - backend/app/**
+      - backend/infra/env/dev/**
+      - backend/infra/modules/**
+      - .github/workflows/backend-dev.yml
+  push:
+    branches:
+      - main
+    paths:
+      - backend/app/**
+      - backend/infra/env/dev/**
+      - backend/infra/modules/**
+      - .github/workflows/backend-dev.yml
+  workflow_dispatch:
+
+concurrency:
+  group: backend-dev-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
+
+jobs:
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      app_changed: ${{ steps.filter.outputs.app }}
+      infra_changed: ${{ steps.filter.outputs.infra }}
+      workflow_changed: ${{ steps.filter.outputs.workflow }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect Paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            app:
+              - 'backend/app/**'
+            infra:
+              - 'backend/infra/env/dev/**'
+              - 'backend/infra/modules/**'
+            workflow:
+              - '.github/workflows/backend-dev.yml'
+
+  app-validate:
+    name: Validate Backend App
+    runs-on: ubuntu-latest
+    needs: changes
+    defaults:
+      run:
+        working-directory: backend/app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/app/go.mod
+          cache: true
+          cache-dependency-path: backend/app/go.sum
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Go Build
+        if: needs.changes.outputs.app_changed == 'true' || needs.changes.outputs.workflow_changed == 'true'
+        run: go build ./cmd/api ./cmd/migrate
+
+      - name: Docker Build
+        if: needs.changes.outputs.app_changed == 'true' || needs.changes.outputs.workflow_changed == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: backend/app
+          load: false
+          push: false
+          platforms: linux/arm64
+          provenance: false
+          tags: local/backend-app:check
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  infra-validate:
+    name: Validate Dev Infra
+    runs-on: ubuntu-latest
+    needs: changes
+    defaults:
+      run:
+        working-directory: backend/infra/env/dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare Terraform Cache Directory
+        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
+
+      - name: Cache Terraform Plugins
+        uses: actions/cache@v4
+        with:
+          path: ~/.terraform.d/plugin-cache
+          key: terraform-${{ runner.os }}-${{ hashFiles('backend/infra/bootstrap/.terraform.lock.hcl', 'backend/infra/env/dev/.terraform.lock.hcl') }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Fmt
+        if: needs.changes.outputs.infra_changed == 'true' || needs.changes.outputs.workflow_changed == 'true'
+        run: terraform fmt -check -recursive ../../modules .
+
+      - name: Terraform Init
+        if: needs.changes.outputs.infra_changed == 'true' || needs.changes.outputs.workflow_changed == 'true'
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform Validate
+        if: needs.changes.outputs.infra_changed == 'true' || needs.changes.outputs.workflow_changed == 'true'
+        run: terraform validate -no-color
+
+  infra-plan:
+    name: Plan Dev Infra
+    if: github.event_name == 'pull_request' && vars.TERRAFORM_DEV_READY == 'true' && (needs.changes.outputs.infra_changed == 'true' || needs.changes.outputs.workflow_changed == 'true')
+    runs-on: ubuntu-latest
+    needs:
+      - changes
+      - infra-validate
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: backend/infra/env/dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare Terraform Cache Directory
+        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
+
+      - name: Cache Terraform Plugins
+        uses: actions/cache@v4
+        with:
+          path: ~/.terraform.d/plugin-cache
+          key: terraform-${{ runner.os }}-${{ hashFiles('backend/infra/bootstrap/.terraform.lock.hcl', 'backend/infra/env/dev/.terraform.lock.hcl') }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.TERRAFORM_BOOTSTRAP_PLAN_ROLE_ARN }}
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -no-color -out=tfplan -var "app_image_uri=${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}:latest"
+
+      - name: Render Plan
+        run: terraform show -no-color tfplan > plan.txt
+
+      - name: Comment Plan
+        uses: actions/github-script@v7
+        env:
+          PLAN_FILE: backend/infra/env/dev/plan.txt
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- backend-dev-plan -->';
+            let plan = fs.readFileSync(process.env.PLAN_FILE, 'utf8');
+            const limit = 60000;
+            if (plan.length > limit) {
+              plan = `${plan.slice(0, limit)}\n...\n[truncated]`;
+            }
+
+            const body = [
+              marker,
+              '## Backend Dev Plan',
+              '',
+              `Repository: ${context.repo.owner}/${context.repo.repo}`,
+              `Ref: ${context.payload.pull_request.head.ref}`,
+              '',
+              '<details><summary>terraform show -no-color tfplan</summary>',
+              '',
+              '```text',
+              plan,
+              '```',
+              '</details>',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find((comment) => comment.body && comment.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
+
+  prepare-image:
+    name: Build and Push App Image
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.TERRAFORM_DEV_READY == 'true' && (needs.changes.outputs.infra_changed == 'true' || needs.changes.outputs.app_changed == 'true' || needs.changes.outputs.workflow_changed == 'true') && (needs.changes.outputs.app_changed != 'true' || vars.BACKEND_APP_READY == 'true')
+    runs-on: ubuntu-latest
+    needs:
+      - changes
+      - app-validate
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      image_uri: ${{ steps.image.outputs.image_uri }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.TERRAFORM_BOOTSTRAP_APPLY_ROLE_ARN }}
+
+      - name: Login to ECR
+        if: needs.changes.outputs.app_changed == 'true'
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Setup Docker Buildx
+        if: needs.changes.outputs.app_changed == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and Push Image
+        if: needs.changes.outputs.app_changed == 'true'
+        uses: docker/build-push-action@v6
+        with:
+          context: backend/app
+          push: true
+          platforms: linux/arm64
+          provenance: false
+          tags: |
+            ${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}:sha-${{ github.sha }}
+            ${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Resolve Digest Image URI
+        id: image
+        env:
+          IMAGE_REPOSITORY_URL: ${{ vars.BACKEND_APP_ECR_REPOSITORY_URL }}
+          AWS_REGION: ${{ vars.AWS_REGION }}
+        run: |
+          REPOSITORY_NAME="${IMAGE_REPOSITORY_URL##*/}"
+          IMAGE_DIGEST=$(aws ecr describe-images \
+            --region "$AWS_REGION" \
+            --repository-name "$REPOSITORY_NAME" \
+            --image-ids imageTag=latest \
+            --query 'imageDetails[0].imageDigest' \
+            --output text)
+
+          if [ -z "$IMAGE_DIGEST" ] || [ "$IMAGE_DIGEST" = "None" ]; then
+            echo "failed to resolve digest for ${IMAGE_REPOSITORY_URL}:latest" >&2
+            exit 1
+          fi
+
+          echo "image_uri=${IMAGE_REPOSITORY_URL}@${IMAGE_DIGEST}" >> "$GITHUB_OUTPUT"
+
+  deploy-dev:
+    name: Apply Dev and Run Migration
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && vars.TERRAFORM_DEV_READY == 'true' && (needs.changes.outputs.infra_changed == 'true' || needs.changes.outputs.app_changed == 'true' || needs.changes.outputs.workflow_changed == 'true') && (needs.changes.outputs.app_changed != 'true' || vars.BACKEND_APP_READY == 'true')
+    runs-on: ubuntu-latest
+    needs:
+      - changes
+      - infra-validate
+      - prepare-image
+    concurrency:
+      group: deploy-dev
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    defaults:
+      run:
+        working-directory: backend/infra/env/dev
+    outputs:
+      task_arn: ${{ steps.run-task.outputs.task_arn }}
+      exit_code: ${{ steps.run-task.outputs.exit_code }}
+      lambda_function_name: ${{ steps.app-tf.outputs.lambda_function_name }}
+      api_endpoint: ${{ steps.app-tf.outputs.api_endpoint }}
+      image_uri: ${{ needs.prepare-image.outputs.image_uri }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare Terraform Cache Directory
+        run: mkdir -p "$TF_PLUGIN_CACHE_DIR"
+
+      - name: Cache Terraform Plugins
+        uses: actions/cache@v4
+        with:
+          path: ~/.terraform.d/plugin-cache
+          key: terraform-${{ runner.os }}-${{ hashFiles('backend/infra/bootstrap/.terraform.lock.hcl', 'backend/infra/env/dev/.terraform.lock.hcl') }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.TERRAFORM_BOOTSTRAP_APPLY_ROLE_ARN }}
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Apply Migration Dependencies
+        run: |
+          terraform apply \
+            -target=module.network \
+            -target=module.aurora_postgres \
+            -target=module.vpc_endpoints \
+            -target=module.ecs_migration \
+            -input=false \
+            -auto-approve \
+            -no-color \
+            -var "app_image_uri=${{ needs.prepare-image.outputs.image_uri }}"
+
+      - name: Capture Migration Terraform Outputs
+        id: migration-tf
+        run: |
+          echo "cluster_name=$(terraform output -raw ecs_cluster_name)" >> "$GITHUB_OUTPUT"
+          echo "task_definition_arn=$(terraform output -raw migration_task_definition_arn)" >> "$GITHUB_OUTPUT"
+          echo "subnet_ids=$(terraform output -json private_subnet_ids | jq -r 'join(",")')" >> "$GITHUB_OUTPUT"
+          echo "security_group_id=$(terraform output -raw app_security_group_id)" >> "$GITHUB_OUTPUT"
+
+      - name: Run Migration Task
+        id: run-task
+        env:
+          SUBNET_IDS: ${{ steps.migration-tf.outputs.subnet_ids }}
+          SECURITY_GROUP_ID: ${{ steps.migration-tf.outputs.security_group_id }}
+          CLUSTER_NAME: ${{ steps.migration-tf.outputs.cluster_name }}
+          TASK_DEFINITION_ARN: ${{ steps.migration-tf.outputs.task_definition_arn }}
+        run: |
+          TASK_ARN=$(aws ecs run-task \
+            --cluster "$CLUSTER_NAME" \
+            --launch-type FARGATE \
+            --task-definition "$TASK_DEFINITION_ARN" \
+            --network-configuration "awsvpcConfiguration={subnets=[$SUBNET_IDS],securityGroups=[$SECURITY_GROUP_ID],assignPublicIp=DISABLED}" \
+            --query 'tasks[0].taskArn' \
+            --output text)
+          echo "task_arn=$TASK_ARN" >> "$GITHUB_OUTPUT"
+          aws ecs wait tasks-stopped --cluster "$CLUSTER_NAME" --tasks "$TASK_ARN"
+          EXIT_CODE=$(aws ecs describe-tasks --cluster "$CLUSTER_NAME" --tasks "$TASK_ARN" --query 'tasks[0].containers[0].exitCode' --output text)
+          echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
+          test "$EXIT_CODE" = "0"
+
+      - name: Terraform Apply Application
+        run: terraform apply -input=false -auto-approve -no-color -var "app_image_uri=${{ needs.prepare-image.outputs.image_uri }}"
+
+      - name: Capture Application Terraform Outputs
+        id: app-tf
+        run: |
+          echo "lambda_function_name=$(terraform output -raw lambda_function_name)" >> "$GITHUB_OUTPUT"
+          echo "api_endpoint=$(terraform output -raw http_api_endpoint)" >> "$GITHUB_OUTPUT"
+
+  report:
+    name: Report Backend Dev
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.deploy-dev.result == 'success'
+    runs-on: ubuntu-latest
+    needs:
+      - deploy-dev
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Comment Deploy Result
+        uses: actions/github-script@v7
+        env:
+          IMAGE_URI: ${{ needs.deploy-dev.outputs.image_uri }}
+          TASK_ARN: ${{ needs.deploy-dev.outputs.task_arn }}
+          EXIT_CODE: ${{ needs.deploy-dev.outputs.exit_code }}
+          LAMBDA_FUNCTION_NAME: ${{ needs.deploy-dev.outputs.lambda_function_name }}
+          API_ENDPOINT: ${{ needs.deploy-dev.outputs.api_endpoint }}
+        with:
+          script: |
+            const marker = '<!-- backend-dev-deploy -->';
+            const associated = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+            });
+
+            const body = [
+              marker,
+              '## Backend Dev Deploy',
+              '',
+              `Image: ${process.env.IMAGE_URI}`,
+              `Migration task: ${process.env.TASK_ARN}`,
+              `Migration exit code: ${process.env.EXIT_CODE}`,
+              `Lambda: ${process.env.LAMBDA_FUNCTION_NAME}`,
+              `API: ${process.env.API_ENDPOINT}`,
+            ].join('\n');
+
+            for (const pr of associated.data) {
+              const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+              });
+              const existing = comments.find((comment) => comment.body && comment.body.includes(marker));
+              if (existing) {
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                  body,
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body,
+                });
+              }
+            }
