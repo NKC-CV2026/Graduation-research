@@ -310,8 +310,8 @@ jobs:
     outputs:
       task_arn: ${{ steps.run-task.outputs.task_arn }}
       exit_code: ${{ steps.run-task.outputs.exit_code }}
-      lambda_function_name: ${{ steps.tf.outputs.lambda_function_name }}
-      api_endpoint: ${{ steps.tf.outputs.api_endpoint }}
+      lambda_function_name: ${{ steps.app-tf.outputs.lambda_function_name }}
+      api_endpoint: ${{ steps.app-tf.outputs.api_endpoint }}
       image_uri: ${{ needs.prepare-image.outputs.image_uri }}
     steps:
       - name: Checkout
@@ -338,26 +338,33 @@ jobs:
       - name: Terraform Init
         run: terraform init -input=false
 
-      - name: Terraform Apply
-        run: terraform apply -input=false -auto-approve -no-color -var "app_image_uri=${{ needs.prepare-image.outputs.image_uri }}"
+      - name: Terraform Apply Migration Dependencies
+        run: |
+          terraform apply \
+            -target=module.network \
+            -target=module.aurora_postgres \
+            -target=module.vpc_endpoints \
+            -target=module.ecs_migration \
+            -input=false \
+            -auto-approve \
+            -no-color \
+            -var "app_image_uri=${{ needs.prepare-image.outputs.image_uri }}"
 
-      - name: Capture Terraform Outputs
-        id: tf
+      - name: Capture Migration Terraform Outputs
+        id: migration-tf
         run: |
           echo "cluster_name=$(terraform output -raw ecs_cluster_name)" >> "$GITHUB_OUTPUT"
           echo "task_definition_arn=$(terraform output -raw migration_task_definition_arn)" >> "$GITHUB_OUTPUT"
           echo "subnet_ids=$(terraform output -json private_subnet_ids | jq -r 'join(",")')" >> "$GITHUB_OUTPUT"
           echo "security_group_id=$(terraform output -raw app_security_group_id)" >> "$GITHUB_OUTPUT"
-          echo "lambda_function_name=$(terraform output -raw lambda_function_name)" >> "$GITHUB_OUTPUT"
-          echo "api_endpoint=$(terraform output -raw http_api_endpoint)" >> "$GITHUB_OUTPUT"
 
       - name: Run Migration Task
         id: run-task
         env:
-          SUBNET_IDS: ${{ steps.tf.outputs.subnet_ids }}
-          SECURITY_GROUP_ID: ${{ steps.tf.outputs.security_group_id }}
-          CLUSTER_NAME: ${{ steps.tf.outputs.cluster_name }}
-          TASK_DEFINITION_ARN: ${{ steps.tf.outputs.task_definition_arn }}
+          SUBNET_IDS: ${{ steps.migration-tf.outputs.subnet_ids }}
+          SECURITY_GROUP_ID: ${{ steps.migration-tf.outputs.security_group_id }}
+          CLUSTER_NAME: ${{ steps.migration-tf.outputs.cluster_name }}
+          TASK_DEFINITION_ARN: ${{ steps.migration-tf.outputs.task_definition_arn }}
         run: |
           TASK_ARN=$(aws ecs run-task \
             --cluster "$CLUSTER_NAME" \
@@ -371,6 +378,15 @@ jobs:
           EXIT_CODE=$(aws ecs describe-tasks --cluster "$CLUSTER_NAME" --tasks "$TASK_ARN" --query 'tasks[0].containers[0].exitCode' --output text)
           echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
           test "$EXIT_CODE" = "0"
+
+      - name: Terraform Apply Application
+        run: terraform apply -input=false -auto-approve -no-color -var "app_image_uri=${{ needs.prepare-image.outputs.image_uri }}"
+
+      - name: Capture Application Terraform Outputs
+        id: app-tf
+        run: |
+          echo "lambda_function_name=$(terraform output -raw lambda_function_name)" >> "$GITHUB_OUTPUT"
+          echo "api_endpoint=$(terraform output -raw http_api_endpoint)" >> "$GITHUB_OUTPUT"
 
   report:
     name: Report Backend Dev
