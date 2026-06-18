@@ -212,6 +212,18 @@ class MainActivity : AppCompatActivity() {
             val dialog = AlertDialog.Builder(this)
                 .setView(settingsView)
                 .create()
+
+            val Btnmap = settingsView.findViewById<Button>(R.id.btnReport)
+
+            Btnmap.setOnClickListener {
+                val intent = Intent (
+                    this,
+                    MapActivity::class.java
+                )
+
+                startActivity(intent)
+                dialog.dismiss()
+            }
             dialog.show()
         }
 

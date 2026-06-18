@@ -10,4 +10,7 @@
     <string name="settings_title">初回起動</string>
     <string name="settings_subTitle">使用するモードを選択してください</string>
     <string name="settings_dicedBtn">決定</string>
+    <string name="backBtn">戻る</string>
+    <string name="zoomInBtn">+</string>
+    <string name="zoomOutBtn">-</string>
 </resources>
