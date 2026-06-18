@@ -1,11 +1,5 @@
 package service
 
-import (
-	"context"
-
-	"github.com/NKC-CV2026/Graduation-research/backend/app/internal/repository"
-)
-
 type HealthStatus string
 
 const (
@@ -18,18 +12,12 @@ type HealthResult struct {
 	Database string       `json:"database"`
 }
 
-type HealthService struct {
-	repo repository.HealthRepository
+type HealthService struct{}
+
+func NewHealthService() *HealthService {
+	return &HealthService{}
 }
 
-func NewHealthService(repo repository.HealthRepository) *HealthService {
-	return &HealthService{repo: repo}
-}
-
-func (s *HealthService) Check(ctx context.Context) HealthResult {
-	if err := s.repo.Ping(ctx); err != nil {
-		return HealthResult{Status: HealthStatusDegraded, Database: "error"}
-	}
-
-	return HealthResult{Status: HealthStatusOK, Database: "ok"}
+func (s *HealthService) Check() HealthResult {
+	return HealthResult{Status: HealthStatusOK, Database: "not checked"}
 }
