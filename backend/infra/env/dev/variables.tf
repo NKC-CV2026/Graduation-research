@@ -36,8 +36,7 @@ variable "private_subnet_cidrs" {
 variable "database_name" {
   description = "Initial database name."
   type        = string
-  # Dev migrations currently assume a fixed database name.
-  default = "gr9_dev"
+  default     = "gr9_dev"
 }
 
 variable "master_username" {
@@ -84,8 +83,7 @@ variable "app_image_uri" {
 variable "app_db_user" {
   description = "Database username used by the application runtime."
   type        = string
-  # Dev migrations currently assume a fixed application DB user.
-  default = "gr9app"
+  default     = "gr9app"
 }
 
 variable "lambda_function_name" {

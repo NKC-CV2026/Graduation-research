@@ -1,6 +1,3 @@
--- Dev currently keeps the application database and user fixed to `gr9_dev`
--- and `gr9app` so that Terraform, migrations, and runtime configuration stay
--- aligned until environment-specific migration templating is introduced.
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'gr9app') THEN
