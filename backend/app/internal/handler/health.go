@@ -16,7 +16,7 @@ func NewHealthHandler(service *service.HealthService) *HealthHandler {
 }
 
 func (h *HealthHandler) Get(w http.ResponseWriter, r *http.Request) {
-	result := h.service.Check(r.Context())
+	result := h.service.Check()
 
 	statusCode := http.StatusOK
 	if result.Status != service.HealthStatusOK {
