@@ -29,6 +29,8 @@ import kotlinx.coroutines.launch
 import androidx.appcompat.app.AlertDialog
 import android.widget.Button
 import android.widget.RadioButton
+import androidx.core.content.ContextCompat
+import android.os.Build
 
 
 class MainActivity : AppCompatActivity() {
@@ -102,6 +104,14 @@ class MainActivity : AppCompatActivity() {
             }
             dialog.show()
         }
+        //通知欄表示
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                200
+            )
+        }
 
         locationGetter = LocationGetter(this)
         // DistanceChecker生成
@@ -133,9 +143,9 @@ class MainActivity : AppCompatActivity() {
                     isMonitoring = false
                     return@setOnClickListener
                 }
-                locationGetter.startLocationUpdate()
+                //locationGetter.startLocationUpdate()
                 binding.locationBtn.text = getString(R.string.btn_onLocation)
-                lifecycleScope.launch {
+                /*lifecycleScope.launch {
                     while (isMonitoring) {
                         //近くの一時停止標識の配列の設定
                         nearStopSign.setStopPoints(this@MainActivity)
@@ -180,11 +190,26 @@ class MainActivity : AppCompatActivity() {
 //unrecoverably broken and will be disposed!
                         //ボタン押して少ししたら出るエラークラッシュする
                     }
-                }
+                }*/
+                //バックグラウンド追加分
+                ContextCompat.startForegroundService(
+                    this,
+                    Intent(
+                        this,
+                        ForegroundService::class.java
+                    )
+                )
                 // 距離判定実行開始
 //                distanceChecker.startChecking()
             }else{
-                locationGetter.stopLocationonUpdate()
+                //locationGetter.stopLocationonUpdate()
+                //バックグラウンド追加分 
+                stopService(
+                    Intent(
+                        this,
+                        ForegroundService::class.java
+                    )
+                )
                 binding.locationBtn.text = getString(R.string.btn_offLocation)
                 Log.e("test","停止した一時停止${distanceChecker.stopSuccsesCount}")
                 Log.e("test","接近した一時停止${distanceChecker.stopPointsCount}")
