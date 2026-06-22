@@ -78,6 +78,10 @@ jobs:
         if: needs.changes.outputs.app_changed == 'true' || needs.changes.outputs.workflow_changed == 'true'
         run: go build ./cmd/api ./cmd/migrate
 
+      - name: Validate Migrations
+        if: needs.changes.outputs.app_changed == 'true' || needs.changes.outputs.workflow_changed == 'true'
+        run: docker run --rm -v "$PWD:/work" -w /work arigaio/atlas:latest migrate validate --dir file://db/migrations
+
       - name: Docker Build
         if: needs.changes.outputs.app_changed == 'true' || needs.changes.outputs.workflow_changed == 'true'
         uses: docker/build-push-action@v6
