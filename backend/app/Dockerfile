@@ -33,13 +33,15 @@ ARG TARGETARCH
 
 RUN apk add --no-cache curl
 RUN mkdir -p /atlas-bin
-RUN curl -sSf https://atlasgo.sh | sh -s -- -y --no-install -o /atlas-bin/atlas --platform linux-$TARGETARCH
+RUN curl -sSf https://atlasgo.sh | sh -s -- -y --no-install -o /atlas-bin/atlas --platform linux-$TARGETARCH && chmod +x /atlas-bin/atlas
 
 FROM public.ecr.aws/lambda/provided:al2023 AS runner
 
-COPY --from=atlas /atlas-bin/atlas /usr/local/bin/atlas
-COPY --from=builder /out/api /api
-COPY --from=builder /out/migrate /migrate
-COPY db /app/db
+COPY --chown=10001:10001 --chmod=0555 --from=atlas /atlas-bin/atlas /usr/local/bin/atlas
+COPY --chown=10001:10001 --chmod=0555 --from=builder /out/api /api
+COPY --chown=10001:10001 --chmod=0555 --from=builder /out/migrate /migrate
+COPY --chown=10001:10001 db /app/db
+
+USER 10001:10001
 
 ENTRYPOINT ["/api"]
