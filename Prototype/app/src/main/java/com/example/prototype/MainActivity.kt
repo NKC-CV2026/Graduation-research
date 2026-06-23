@@ -211,8 +211,8 @@ class MainActivity : AppCompatActivity() {
                     )
                 )
                 binding.locationBtn.text = getString(R.string.btn_offLocation)
-                Log.e("test","停止した一時停止${distanceChecker.stopSuccsesCount}")
-                Log.e("test","接近した一時停止${distanceChecker.stopPointsCount}")
+//                Log.e("test","停止した一時停止${distanceChecker.stopSuccsesCount}")
+//                Log.e("test","接近した一時停止${distanceChecker.stopPointsCount}")
                 // 距離判定停止
 //                distanceChecker.stopChecking()
             }
@@ -220,6 +220,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnReport.setOnClickListener {
+            Log.e("btncheack","クリック")
             val intent = Intent(
                 this,
                 ReportActivity::class.java

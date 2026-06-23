@@ -11,6 +11,7 @@ import android.media.MediaPlayer
 import android.os.Vibrator
 import android.os.VibrationEffect
 import com.example.prototype.LocationGetter
+import kotlin.math.sin
 
 
 class DistanceChecker(private val context: Context) {
@@ -25,7 +26,7 @@ class DistanceChecker(private val context: Context) {
 
     var nowSpeed = 100f
 
-    val detectDistance = 80f //接近を検知する距離
+    val detectDistance = 30f //接近を検知する距離
 
     var previousDistance = -1f //
 
@@ -62,7 +63,7 @@ class DistanceChecker(private val context: Context) {
         targetLatitude ?: return
         targetLongitude ?: return
         nowLongtitude ?: return
-        nowLongtitude ?: return
+        nowLatitude ?: return
         Location.distanceBetween(
             nowLatitude!!,
             nowLongtitude!!,
@@ -71,6 +72,9 @@ class DistanceChecker(private val context: Context) {
             results
         )
         val distance = results[0]
+        val bearing = bearing()
+        val radians = Math.toRadians(bearing.toDouble())
+        val roadCheck = sin(radians)
 
         Log.d("DistanceCheck", "距離 = $distance")
 
@@ -89,9 +93,10 @@ class DistanceChecker(private val context: Context) {
             }
         }
 
-        if (distance <= detectDistance && isChecks) {
+        if (isChecks && distance <= detectDistance && roadCheck <= 5) {
             if (distance <= 5f){
                 stopPointsCount++
+                isChecks = false
                 if (nowSpeed <= 5f){
                     stopSuccsesCount++
                     Log.e("test","一時停止")
@@ -133,6 +138,26 @@ class DistanceChecker(private val context: Context) {
 //            }
 //
     }
+
+    fun bearing(): Float {
+        // 出発地点
+        val startLocation = Location("start").apply {
+            latitude = targetLatitude!!
+            longitude = targetLongitude!!
+        }
+
+        // 目的地点
+        val endLocation = Location("end").apply {
+            latitude = nowLatitude!!
+            longitude = nowLongtitude!!
+        }
+
+        // bearingTo() で方位角を取得
+        val bearing = startLocation.bearingTo(endLocation) % 90
+
+        return bearing
+    }
+
 
     // 開始　将来的に消す
 //    fun startChecking() {
