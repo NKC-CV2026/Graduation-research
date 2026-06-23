@@ -14,8 +14,12 @@ class ReportActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityReportBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val stopSuccsesCount = intent.getIntExtra("STOP_SUCCSES_COUNT",0)
-        val stopPointsCount = intent.getIntExtra("STOP_POINTS_COUNT",0)
+        val pref = getSharedPreferences(
+            "report"
+            ,MODE_PRIVATE
+        )
+        val stopSuccsesCount = pref.getInt("STOP_SUCCSES_COUNT",0)
+        val stopPointsCount = pref.getInt("STOP_POINTS_COUNT",0)
         binding.txtReport.text = "一時停止した回数 : ${stopSuccsesCount}回\n" + "一時停止総数 : ${stopPointsCount}回"
         binding.btnClose.setOnClickListener {
             finish()

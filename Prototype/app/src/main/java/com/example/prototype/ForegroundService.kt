@@ -23,6 +23,8 @@ class ForegroundService : Service() {
     private lateinit var nearStopSign: NearStopSign
     private lateinit var distanceChecker: DistanceChecker
 
+    private var lastUniqueKey = 0
+
     private val serviceScope = CoroutineScope(
         Dispatchers.Default + SupervisorJob()
     )
@@ -94,6 +96,10 @@ class ForegroundService : Service() {
                     delay(1000L)
                     continue
                 }
+                if (nearStop["uniqueKey"] != lastUniqueKey){
+                    distanceChecker.isChecks = true
+                    lastUniqueKey = nearStop["uniqueKey"].toString().toInt()
+                }
 
                 distanceChecker.targetLatitude = nearStop["lat"] as Double
                 distanceChecker.targetLongitude = nearStop["long"] as Double
@@ -113,6 +119,21 @@ class ForegroundService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+
+        val prefs = getSharedPreferences(
+            "report"
+            ,MODE_PRIVATE
+        )
+        prefs.edit()
+            .putInt(
+                "STOP_SUCCSES_COUNT"
+                ,distanceChecker.stopSuccsesCount
+            )
+        prefs.edit()
+            .putInt(
+                "STOP_POINTS_COUNT"
+                ,distanceChecker.stopPointsCount
+            ).apply()
 
         locationGetter.stopLocationonUpdate()
 
