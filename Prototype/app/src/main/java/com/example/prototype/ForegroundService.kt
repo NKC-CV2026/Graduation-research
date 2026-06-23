@@ -74,7 +74,7 @@ class ForegroundService : Service() {
                 val nowLat = locationGetter.getLat()
                 val nowLong = locationGetter.getLong()
                 val nowBearing = locationGetter.getBearing()
-                
+
                 if (
                     nowLat == null ||
                     nowLong == null ||
