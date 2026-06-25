@@ -13,7 +13,7 @@
         tools:ignore="ExtraText">
 
         <!-- 左上：レポート -->
-        <TextView
+        <Button
             android:id="@+id/btnReport"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -28,7 +28,7 @@
             android:minHeight="48dp"
             android:text="レポート"
             android:textColor="#2196F3"
-            android:textSize="16sp"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
         @android:drawable/ic_menu_preferences

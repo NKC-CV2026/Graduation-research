@@ -53,7 +53,6 @@ module "lambda_service" {
   db_cluster_resource_id = module.aurora_postgres.cluster_resource_id
   db_user                = var.app_db_user
   environment_variables = {
-    AWS_REGION  = var.aws_region
     DB_HOST     = module.aurora_postgres.cluster_endpoint
     DB_PORT     = tostring(module.aurora_postgres.port)
     DB_NAME     = module.aurora_postgres.database_name
