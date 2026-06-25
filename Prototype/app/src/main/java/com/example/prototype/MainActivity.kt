@@ -121,8 +121,8 @@ class MainActivity : AppCompatActivity() {
         binding.locationBtn.setOnClickListener() {
             isMonitoring = !isMonitoring
             if (isMonitoring){
-                distanceChecker.stopSuccsesCount = 0
-                distanceChecker.stopPointsCount = 0
+//                distanceChecker.stopSuccsesCount = 0
+//                distanceChecker.stopPointsCount = 0
                 if (ActivityCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_FINE_LOCATION
