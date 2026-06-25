@@ -1,12 +1,9 @@
 package com.example.prototype
 
-//import android.Manifest
 import android.content.Context
 import android.os.Looper
 import android.util.Log
 import android.location.Location
-//import kotlinx.coroutines.Runnable
-//import java.util.logging.Handler
 import android.media.MediaPlayer
 import android.os.Vibrator
 import android.os.VibrationEffect
@@ -17,7 +14,6 @@ import kotlin.math.sin
 class DistanceChecker(private val context: Context) {
     var stopSuccsesCount = 0
     var stopPointsCount = 0
-
     var targetLatitude: Double? = null //目的地緯度
     var targetLongitude: Double? = null //目的地経度
 
@@ -49,7 +45,7 @@ class DistanceChecker(private val context: Context) {
 //        停止回数生成
         stopSuccsesCount = 0
         //音声ファイル読み込み
-        mediaPlayer = MediaPlayer.create(context,R.raw.alert)
+        mediaPlayer = MediaPlayer.create(context,R.raw.alert_tsumugi)
         //ループ再生するように
         mediaPlayer?.isLooping = true
 
