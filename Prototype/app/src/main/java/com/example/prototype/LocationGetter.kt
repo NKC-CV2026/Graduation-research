@@ -28,7 +28,7 @@ class LocationGetter(
         override fun onLocationResult(locationResult: LocationResult) {
             for (location in locationResult.locations){
                 Log.e(
-                    "位置情報","緯度：${location.latitude}経度：${location.longitude}方位角：${location.bearing}"
+                    "位置情報","緯度：${location.latitude}経度：${location.longitude}方位角：${location.bearing}速度:${speed}"
                 )
                 lat = location.latitude
                 long = location.longitude

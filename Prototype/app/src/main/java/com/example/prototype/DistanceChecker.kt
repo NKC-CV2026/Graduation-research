@@ -42,8 +42,8 @@ class DistanceChecker(private val context: Context) {
 
     //クラス生成時に自動実行
     init {
-//        停止回数生成
-        stopSuccsesCount = 0
+////        停止回数生成
+//        stopSuccsesCount = 0
         //音声ファイル読み込み
         mediaPlayer = MediaPlayer.create(context,R.raw.alert_tsumugi)
         //ループ再生するように
@@ -70,7 +70,7 @@ class DistanceChecker(private val context: Context) {
         val distance = results[0]
         val bearing = bearing()
         val radians = Math.toRadians(bearing.toDouble())
-        val roadCheck = sin(radians)
+        val roadCheck = Math.abs(sin(radians) * distance)
 
         Log.d("DistanceCheck", "距離 = $distance")
 
@@ -84,7 +84,7 @@ class DistanceChecker(private val context: Context) {
                 }
                 //バイブレーション停止
                 vibrator?.cancel()
-                isChecks = false
+//                isChecks = false
                 //ここで次の一時停止地点を探すようにする
             }
         }
@@ -136,20 +136,20 @@ class DistanceChecker(private val context: Context) {
     }
 
     fun bearing(): Float {
-        // 出発地点
+        // 目的地点
         val startLocation = Location("start").apply {
             latitude = targetLatitude!!
             longitude = targetLongitude!!
         }
 
-        // 目的地点
+        // 現在地点
         val endLocation = Location("end").apply {
             latitude = nowLatitude!!
             longitude = nowLongtitude!!
         }
 
         // bearingTo() で方位角を取得
-        val bearing = startLocation.bearingTo(endLocation) % 90
+        val bearing = startLocation.bearingTo(endLocation) % 180
 
         return bearing
     }

@@ -108,7 +108,7 @@ class ForegroundService : Service() {
                 distanceChecker.nowLongtitude = nowLong
                 distanceChecker.nowSpeed = locationGetter.getSpeed()
 
-                distanceChecker.isChecks = true
+//                distanceChecker.isChecks = true
                 distanceChecker.run()
 
                 delay(1000L)
