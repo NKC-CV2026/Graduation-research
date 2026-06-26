@@ -8,6 +8,7 @@ import android.media.MediaPlayer
 import android.os.Vibrator
 import android.os.VibrationEffect
 import com.example.prototype.LocationGetter
+import kotlin.math.cos
 import kotlin.math.sin
 
 
@@ -70,7 +71,7 @@ class DistanceChecker(private val context: Context) {
         val distance = results[0]
         val bearing = bearing()
         val radians = Math.toRadians(bearing.toDouble())
-        val roadCheck = Math.abs(sin(radians) * distance)
+        val roadCheck = Math.abs(cos(radians) * distance)
 
         Log.d("DistanceCheck", "距離 = $distance")
 
@@ -88,7 +89,7 @@ class DistanceChecker(private val context: Context) {
                 //ここで次の一時停止地点を探すようにする
             }
         }
-
+    Log.e("test","${roadCheck}")
         if (isChecks && distance <= detectDistance && roadCheck <= 5) {
             if (distance <= 5f){
                 stopPointsCount++
@@ -149,7 +150,7 @@ class DistanceChecker(private val context: Context) {
         }
 
         // bearingTo() で方位角を取得
-        val bearing = startLocation.bearingTo(endLocation) % 180
+        val bearing = startLocation.bearingTo(endLocation) //% 180
 
         return bearing
     }

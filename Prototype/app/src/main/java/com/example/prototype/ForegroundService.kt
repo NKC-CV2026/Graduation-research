@@ -128,7 +128,7 @@ class ForegroundService : Service() {
             .putInt(
                 "STOP_SUCCSES_COUNT"
                 ,distanceChecker.stopSuccsesCount
-            )
+            ).apply()
         prefs.edit()
             .putInt(
                 "STOP_POINTS_COUNT"
