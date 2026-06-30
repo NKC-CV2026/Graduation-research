@@ -23,7 +23,7 @@ class ForegroundService : Service() {
     private lateinit var nearStopSign: NearStopSign
     private lateinit var distanceChecker: DistanceChecker
 
-    private var lastUniqueKey = 0
+    private var lastUniqueKey = ""
 
     private val serviceScope = CoroutineScope(
         Dispatchers.Default + SupervisorJob()
@@ -82,7 +82,7 @@ class ForegroundService : Service() {
                     nowLong == null ||
                     nowBearing == null
                 ) {
-                    delay(1000)
+                    delay(1000L)
                     continue
                 }
                 val nearStop = nearStopSign.matchStopSing(
@@ -96,9 +96,11 @@ class ForegroundService : Service() {
                     delay(1000L)
                     continue
                 }
-                if (nearStop["uniqueKey"] != lastUniqueKey){
+                Log.e("test","${nearStop["uniqueKey"]}")
+                if (!lastUniqueKey.equals(nearStop["uniqueKey"])){
                     distanceChecker.isChecks = true
-                    lastUniqueKey = nearStop["uniqueKey"].toString().toInt()
+                    distanceChecker.previousDistance = -1f
+                    lastUniqueKey = nearStop["uniqueKey"].toString()
                 }
 
                 distanceChecker.targetLatitude = nearStop["lat"] as Double
