@@ -29,7 +29,7 @@ class ForegroundService : Service() {
     // 距離判定・通知クラス
     private lateinit var distanceChecker: DistanceChecker
     // 前回検知した標識のuniqueKey (同じ標識への再通知を防ぐために使用する)
-    private var lastUniqueKey = ""
+    var lastUniqueKey = ""
 
     // バックグラウンド処理用のCoroutine
     private val serviceScope = CoroutineScope(
@@ -156,6 +156,7 @@ class ForegroundService : Service() {
                 "STOP_POINTS_COUNT", distanceChecker.stopPointsCount
             )
         }
+        Log.e("test","${distanceChecker.unStopSign}")
         // GPS取得停止
         locationGetter.stopLocationonUpdate()
         // Coroutine停止

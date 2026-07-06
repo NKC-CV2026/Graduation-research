@@ -14,7 +14,7 @@ class NearStopSign() {
 
     // rawフォルダ内のJSONファイルから一時停止標識データを読み込む
     fun setStopPoints(context: Context){
-        val inputjson = context.resources.openRawResource( R.raw.port)
+        val inputjson = context.resources.openRawResource( R.raw.outputstop)
         val inputString = inputjson.bufferedReader().use { it.readText() }
         val inputArray = JSONArray(inputString)
         // 前回のデータが残らないように一度空にする
@@ -142,10 +142,10 @@ class NearStopSign() {
             // bearingToStop：現在地から標識へ向かう方位角
             // diff：自分の進行方向と標識方向の角度差
             // roadCheck：進行方向の直線から標識が横に何mずれているか
-            Log.e(
-                "ROAD_CHECK",
-                "key=${stop["uniqueKey"]} distance=$distance bearingToStop=$bearingToStop diff=$diff roadCheck=$roadCheck"
-            )
+//            Log.e(
+//                "ROAD_CHECK",
+//                "key=${stop["uniqueKey"]} distance=$distance bearingToStop=$bearingToStop diff=$diff roadCheck=$roadCheck"
+//            )
 
             // diff <= 120f：進行方向との差が120度以内の標識だけ残す
             //0〜120度 → 残す 120〜180度 → 除外 (厳密に「後ろを全部除外」したいなら diff <= 90f)
