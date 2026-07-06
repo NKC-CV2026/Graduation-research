@@ -1,6 +1,7 @@
 package com.example.prototype
 
 import android.content.Context
+import androidx.core.content.edit
 
 class FirstLaunchCheck(private val context: Context) {
     private val prefs = context.getSharedPreferences(
@@ -17,21 +18,21 @@ class FirstLaunchCheck(private val context: Context) {
 
     //初回起動が終わったことを記録する
     fun setFirstLaunchFinished() {
-        prefs.edit()
-            .putBoolean(
+        prefs.edit {
+            putBoolean(
                 "first_launch",
                 false
             )
-            .apply()
+        }
     }
 
     // 追加：初回起動状態に戻す
     fun resetFirstLaunch() {
-        prefs.edit()
-            .putBoolean(
+        prefs.edit {
+            putBoolean(
                 "first_launch",
                 true
             )
-            .apply()
+        }
     }
 }
