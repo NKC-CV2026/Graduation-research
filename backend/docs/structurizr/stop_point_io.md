@@ -55,13 +55,13 @@
 
 ### 入力
 
-- `lat: number`
+- `latitude: float64`
   - 検索中心の緯度
-- `long: number`
+- `longitude: float64`
   - 検索中心の経度
-- `radius: number`
+- `radiusMeters: int`
   - 検索半径（m）
-- `limit: integer`
+- `limit: int`
   - 取得件数の上限
   - 未指定時は `500`
 
@@ -73,9 +73,9 @@
   - 停止点の一意識別子
 - `az: string`
   - 停止点に対応する属性値
-- `lat: string`
+- `latitude: float64`
   - 停止点の緯度
-- `long: string`
+- `longitude: float64`
   - 停止点の経度
 
 ## StopPointService.GetByID
@@ -93,26 +93,26 @@
   - 停止点の一意識別子
 - `az: string`
   - 停止点に対応する属性値
-- `lat: string`
+- `latitude: float64`
   - 停止点の緯度
-- `long: string`
+- `longitude: float64`
   - 停止点の経度
-- `created_at: string`
+- `createdAt: time.Time`
   - 作成日時
-- `updated_at: string`
+- `updatedAt: time.Time`
   - 更新日時
 
 ## StopPointRepository.FindByRange
 
 ### 入力
 
-- `lat: number`
+- `latitude: float64`
   - 検索中心の緯度
-- `long: number`
+- `longitude: float64`
   - 検索中心の経度
-- `radius: number`
+- `radiusMeters: int`
   - 検索半径（m）
-- `limit: integer`
+- `limit: int`
   - 取得件数の上限
 
 ### 出力
@@ -123,9 +123,9 @@
   - 停止点の一意識別子
 - `az: string`
   - 停止点に対応する属性値
-- `lat: string`
+- `latitude: float64`
   - 停止点の緯度
-- `long: string`
+- `longitude: float64`
   - 停止点の経度
 
 ## StopPointRepository.FindByID
@@ -143,13 +143,13 @@
   - 停止点の一意識別子
 - `az: string`
   - 停止点に対応する属性値
-- `lat: string`
+- `latitude: float64`
   - 停止点の緯度
-- `long: string`
+- `longitude: float64`
   - 停止点の経度
-- `created_at: string`
+- `createdAt: time.Time`
   - 作成日時
-- `updated_at: string`
+- `updatedAt: time.Time`
   - 更新日時
 
 ## StopPointModel
@@ -162,12 +162,12 @@
 ### 出力
 
 - `StopPoint`
-  - 停止点の共通モデル
+  - Service / Repository 間で共有する内部モデル
 - `GetByRangeInput`
-  - 範囲検索用の入力モデル
+  - 範囲検索用の内部入力モデル
 - `GetByIDInput`
-  - ID検索用の入力モデル
+  - ID検索用の内部入力モデル
 - `StopPointRangeResponse`
-  - 範囲検索API用の出力モデル
+  - Handler が返す範囲検索API用の出力モデル
 - `StopPointDetailResponse`
-  - ID検索API用の出力モデル
+  - Handler が返すID検索API用の出力モデル

@@ -14,7 +14,7 @@
 このディレクトリで次を実行します。
 
 ```bash
-docker compose up
+UID=$(id -u) GID=$(id -g) docker compose up
 ```
 
 起動後に `http://localhost:8080` を開くと、`workspace.dsl` の内容を確認できます。
