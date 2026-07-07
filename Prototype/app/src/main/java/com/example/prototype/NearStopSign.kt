@@ -14,7 +14,7 @@ class NearStopSign() {
 
     // rawフォルダ内のJSONファイルから一時停止標識データを読み込む
     fun setStopPoints(context: Context){
-        val inputjson = context.resources.openRawResource( R.raw.outputstop)
+        val inputjson = context.resources.openRawResource( R.raw.port)
         val inputString = inputjson.bufferedReader().use { it.readText() }
         val inputArray = JSONArray(inputString)
         // 前回のデータが残らないように一度空にする
