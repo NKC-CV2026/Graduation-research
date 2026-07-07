@@ -5,6 +5,8 @@
 ## Files
 
 - `workspace.dsl`: レイヤ分けしたコンポーネント図の定義
+- `stop_point_component_design.md`: StopPoint API の設計メモ
+- `stop_point_io.md`: StopPoint API の I/O 定義
 - `compose.yaml`: `Structurizr` ローカルビューアを起動するための定義
 
 ## Usage
@@ -19,8 +21,8 @@ docker compose up
 
 ## 現在のモデリング方針
 
-- バックエンド本体は `Entrypoint -> Handler -> Service -> Domain / Repository` のレイヤで表現する
+- バックエンド本体は `Entrypoint -> Handler -> Service -> Model / Repository` のレイヤで表現する
 - 上位 AWS インフラからバックエンドにリクエストが流入する経路を図に含める
-- `Domain` は各コンポーネント内、またはコンポーネント間で扱うデータモデルと型の定義として扱う
+- `Model` は各コンポーネント内、またはコンポーネント間で扱うデータモデルと型の定義として扱う
 - DB はバックエンド外部の要素として表示し、`PostGIS` による地理空間検索責務を明示する
 - マイグレーションとインフラ構築要素は今回の図の対象外とする

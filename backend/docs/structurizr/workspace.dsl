@@ -1,4 +1,4 @@
-workspace "バックエンドのレイヤードアーキテクチャ" "バックエンドアプリケーションのレイヤードコンポーネント図。" {
+workspace "StopPointコンポーネント図" "StopPoint API のコンポーネント図。" {
 
     !identifiers hierarchical
 
@@ -11,25 +11,37 @@ workspace "バックエンドのレイヤードアーキテクチャ" "バック
             }
         }
 
-        backend = softwareSystem "バックエンドAPI" "OpenAPIで定義されたAPIを実装するバックエンドアプリケーション。" {
-            api = container "アプリケーションランタイム" "レイヤードアーキテクチャでリクエストを処理する実行単位。" "Go, AWS Lambda" {
-                entrypoint = component "Entrypoint層" "Lambdaハンドラや起動時の初期化を担う。AWSインフラからのリクエストを受け取り、処理を開始する。" "internal/entrypoint" {
+        backend = softwareSystem "バックエンドAPI" "OpenAPIで定義された StopPoint API を実装するバックエンドアプリケーション。" {
+            api = container "アプリケーションランタイム" "StopPoint API をレイヤードアーキテクチャで処理する実行単位。" "Go, AWS Lambda" {
+                entrypoint = component "Entrypoint層" "Lambdaハンドラや起動時の初期化を担う。AWSインフラからのリクエストを受け取り、Handlerへ処理を委譲する。" "internal/entrypoint" {
                     tags "Layer", "Entrypoint"
                 }
 
-                handler = component "Handler層" "HTTPイベントをアプリケーション入力へ変換し、レスポンスを組み立てる。" "internal/handler" {
-                    tags "Layer", "Handler"
+                group "Handlers" {
+                    getByIDHandler = component "Handlers.GetByID" "StopPointHandlers に属する ID検索用メソッド。停止点ID検索APIの HTTP 入出力を扱う。" "internal/handler.(*StopPointHandlers).GetByID" {
+                        tags "Layer", "HandlerMethod"
+                    }
+
+                    getByRangeHandler = component "Handlers.GetByRange" "StopPointHandlers に属する 範囲検索用メソッド。停止点範囲検索APIの HTTP 入出力を扱う。" "internal/handler.(*StopPointHandlers).GetByRange" {
+                        tags "Layer", "HandlerMethod"
+                    }
                 }
 
-                service = component "Service層" "OpenAPIで定義された各APIのユースケースを実行する。" "internal/service" {
-                    tags "Layer", "Service"
+                group "Services" {
+                    getByIDService = component "Services.GetByID" "StopPointService に属する ID検索用メソッド。停止点IDによる取得ユースケースを実行する。" "internal/service.(*StopPointService).GetByID" {
+                        tags "Layer", "ServiceMethod"
+                    }
+
+                    getByRangeService = component "Services.GetByRange" "StopPointService に属する 範囲検索用メソッド。中心座標、範囲、limit を用いた検索ユースケースを実行する。" "internal/service.(*StopPointService).GetByRange" {
+                        tags "Layer", "ServiceMethod"
+                    }
                 }
 
-                domain = component "Domain層" "各コンポーネント内、またはコンポーネント間で扱うデータモデルと型を定義する。" "internal/domain" {
-                    tags "Layer", "Domain"
+                stopPointModel = component "StopPointModel" "StopPoint API で共有するデータモデルと型を定義する。StopPoint、GetByRangeInput、検索条件、メタデータを含む。" "internal/model" {
+                    tags "Layer", "Model"
                 }
 
-                repository = component "Repository層" "Service層に対して永続化処理と地理空間データアクセスを提供する。" "internal/repository" {
+                stopPointRepository = component "StopPointRepository" "StopPoint の永続化・取得を抽象化する。FindByID と FindByRange を提供し、PostGIS を用いた実検索を隠蔽する。" "internal/repository" {
                     tags "Layer", "Repository"
                 }
             }
@@ -41,13 +53,18 @@ workspace "バックエンドのレイヤードアーキテクチャ" "バック
 
         apiUser -> awsPlatform.edge "APIを呼び出す" "HTTPS"
         awsPlatform.edge -> backend.api.entrypoint "バックエンドを起動する" "Lambda event"
-        backend.api.entrypoint -> backend.api.handler "リクエスト処理を委譲する"
-        backend.api.handler -> backend.api.service "ユースケース実行を依頼する"
-        backend.api.handler -> backend.api.domain "入出力で扱うモデルを利用する"
-        backend.api.service -> backend.api.domain "処理で扱うモデルを利用する"
-        backend.api.service -> backend.api.repository "データアクセスを依頼する"
-        backend.api.repository -> backend.api.domain "永続化・取得対象のモデルを利用する"
-        backend.api.repository -> database "保存・取得・地理空間検索を行う" "SQL/PostGIS"
+        backend.api.entrypoint -> backend.api.getByIDHandler "ID検索リクエストをルーティングする"
+        backend.api.entrypoint -> backend.api.getByRangeHandler "範囲検索リクエストをルーティングする"
+        backend.api.getByIDHandler -> backend.api.stopPointModel "入出力モデルを利用する"
+        backend.api.getByIDHandler -> backend.api.getByIDService "GetByID を呼び出す"
+        backend.api.getByRangeHandler -> backend.api.stopPointModel "入出力モデルを利用する"
+        backend.api.getByRangeHandler -> backend.api.getByRangeService "GetByRange を呼び出す"
+        backend.api.getByIDService -> backend.api.stopPointModel "共有モデルを利用する"
+        backend.api.getByIDService -> backend.api.stopPointRepository "FindByID を依頼する"
+        backend.api.getByRangeService -> backend.api.stopPointModel "共有モデルと検索条件を利用する"
+        backend.api.getByRangeService -> backend.api.stopPointRepository "FindByRange を依頼する"
+        backend.api.stopPointRepository -> backend.api.stopPointModel "永続化・取得対象モデルを利用する"
+        backend.api.stopPointRepository -> database "保存・取得・地理空間検索を行う" "SQL/PostGIS"
     }
 
     views {
@@ -66,7 +83,7 @@ workspace "バックエンドのレイヤードアーキテクチャ" "バック
             autoLayout lr
         }
 
-        component backend.api "backend-layered-components" {
+        component backend.api "stop-point-components" {
             include apiUser
             include awsPlatform
             include database
@@ -116,16 +133,28 @@ workspace "バックエンドのレイヤードアーキテクチャ" "バック
                 shape RoundedBox
             }
 
+            element "HandlerMethod" {
+                shape RoundedBox
+            }
+
             element "Service" {
                 shape RoundedBox
             }
 
-            element "Domain" {
+            element "ServiceMethod" {
+                shape RoundedBox
+            }
+
+            element "Model" {
                 shape Hexagon
             }
 
             element "Repository" {
                 shape Box
+            }
+
+            element "Group" {
+                color "#1f2933"
             }
         }
     }
