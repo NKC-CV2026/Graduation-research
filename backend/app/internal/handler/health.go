@@ -7,15 +7,15 @@ import (
 	"github.com/NKC-CV2026/Graduation-research/backend/app/internal/service"
 )
 
-type HealthHandler struct {
+type HealthHandlers struct {
 	service *service.HealthService
 }
 
-func NewHealthHandler(service *service.HealthService) *HealthHandler {
-	return &HealthHandler{service: service}
+func NewHealthHandlers(service *service.HealthService) *HealthHandlers {
+	return &HealthHandlers{service: service}
 }
 
-func (h *HealthHandler) Get(w http.ResponseWriter, r *http.Request) {
+func (h *HealthHandlers) Get(w http.ResponseWriter, r *http.Request) {
 	result := h.service.Check()
 
 	statusCode := http.StatusOK
