@@ -12,7 +12,10 @@ import (
 	"github.com/NKC-CV2026/Graduation-research/backend/app/internal/service"
 )
 
-const defaultStopPointSearchLimit = 500
+const (
+	defaultStopPointSearchLimit = 500
+	maxStopPointSearchLimit     = 500
+)
 
 type StopPointHandlers struct {
 	service *service.StopPointService
@@ -129,6 +132,9 @@ func parseGetByRangeInput(r *http.Request) (domain.GetStopPointsByRangeInput, er
 		}
 		if limit <= 0 {
 			return domain.GetStopPointsByRangeInput{}, fmt.Errorf("limit must be greater than 0")
+		}
+		if limit > maxStopPointSearchLimit {
+			return domain.GetStopPointsByRangeInput{}, fmt.Errorf("limit must be less than or equal to %d", maxStopPointSearchLimit)
 		}
 	}
 
