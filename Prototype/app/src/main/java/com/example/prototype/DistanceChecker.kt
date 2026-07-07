@@ -28,6 +28,8 @@ class DistanceChecker(private val context: Context) {
     // 現在の速度
     var nowSpeed = 100f
 
+    var unStopSign = mutableListOf<String>()
+
     // この距離以内に入ったら警告を鳴らす
     val detectDistance = 30f //接近を検知する距離
 
@@ -38,7 +40,7 @@ class DistanceChecker(private val context: Context) {
     var isChecks = true
 
     // 現在対象になっている標識のID
-    var targetUniqueKey = ""
+    var targetUniqueKey: String = ""
 
 
     private var mediaPlayer: MediaPlayer? = null //メディアプレイヤー
@@ -114,10 +116,12 @@ class DistanceChecker(private val context: Context) {
             // 標識から10m以内に入ったら、通過対象としてカウントする
             if (distance <= 10f){
                 stopPointsCount++
+                unStopSign.add(targetUniqueKey)
 //                isChecks = false
-                // 速度が13以下なら一時停止成功としてカウントする (現在はテスト用の値。本番ではもっと低い値にする予定)
+                // 速度が5以下なら一時停止成功としてカウントする (現在はテスト用の値。本番ではもっと低い値にする予定)
                 if (nowSpeed <= 5f){
                     stopSuccsesCount++
+                    unStopSign.remove(targetUniqueKey)
                     Log.e("test","一時停止")
                 }
                 // 同じ標識で何度もカウントしないようにする
