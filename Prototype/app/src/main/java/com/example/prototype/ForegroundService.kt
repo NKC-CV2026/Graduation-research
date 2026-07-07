@@ -5,6 +5,8 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.health.connect.datatypes.ExerciseRoute
+import android.location.Location
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
@@ -30,6 +32,9 @@ class ForegroundService : Service() {
     private lateinit var distanceChecker: DistanceChecker
     // 前回検知した標識のuniqueKey (同じ標識への再通知を防ぐために使用する)
     var lastUniqueKey = ""
+
+    private var lastUpdateLatitude: Double? = null
+    private var lastUpdateLongitude: Double? = null
 
     // バックグラウンド処理用のCoroutine
     private val serviceScope = CoroutineScope(
@@ -98,6 +103,27 @@ class ForegroundService : Service() {
                 ) {
                     delay(1000L)
                     continue
+                }
+                if (lastUpdateLatitude == null || lastUpdateLongitude == null){
+                    nearStopSign.setStopPoints(this@ForegroundService)
+                    lastUpdateLatitude = nowLat
+                    lastUpdateLongitude = nowLong
+                }else{
+                    val results = FloatArray(1)
+
+                    Location.distanceBetween(
+                        lastUpdateLatitude!!
+                        ,lastUpdateLongitude!!
+                        ,nowLat
+                        ,nowLong
+                        ,results
+                    )
+
+                    if (results[0] >= 50f){
+                        nearStopSign.setStopPoints(this@ForegroundService)
+                        lastUpdateLatitude = nowLat
+                        lastUpdateLongitude = nowLong
+                    }
                 }
                 // 現在地・進行方向から最も適切な一時停止標識を検索
                 val nearStop = nearStopSign.matchStopSing(

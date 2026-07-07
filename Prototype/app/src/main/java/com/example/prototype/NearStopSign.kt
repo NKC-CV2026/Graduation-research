@@ -4,6 +4,7 @@ import android.content.Context
 import android.location.Location
 import org.json.JSONArray
 import android.util.Log
+import java.io.File
 
 
 // 一時停止標識のデータを読み込み
@@ -15,7 +16,12 @@ class NearStopSign() {
     // rawフォルダ内のJSONファイルから一時停止標識データを読み込む
     fun setStopPoints(context: Context){
         val inputjson = context.resources.openRawResource( R.raw.port)
-        val inputString = inputjson.bufferedReader().use { it.readText() }
+        val file = File(context.filesDir, "stop_points.json")
+        val inputString = if (file.exists()){
+            file.readText()
+        }else {
+            inputjson.bufferedReader().use { it.readText() }
+        }
         val inputArray = JSONArray(inputString)
         // 前回のデータが残らないように一度空にする
         stopPoints.clear()
