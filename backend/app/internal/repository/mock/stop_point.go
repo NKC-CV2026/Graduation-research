@@ -91,8 +91,10 @@ func (r *StopPointRepository) FindByRange(_ context.Context, input domain.GetSto
 		limit = len(r.stopPoints)
 	}
 
-	stopPoints := make([]domain.StopPoint, limit)
-	copy(stopPoints, r.stopPoints[:limit])
+	stopPoints := make([]domain.StopPoint, 0, maxStopPointRangeResults)
+	for i := 0; i < limit; i++ {
+		stopPoints = append(stopPoints, r.stopPoints[i])
+	}
 
 	return stopPoints, nil
 }
