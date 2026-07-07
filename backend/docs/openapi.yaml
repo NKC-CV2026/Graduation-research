@@ -1,0 +1,236 @@
+openapi: 3.0.3
+info:
+  title: Bicycle Stop Point Warning API
+  version: v1
+  description: >
+    自転車利用者向けに、一時停止警告対象地点 (StopPoint) を返す取得専用 API。
+    現時点では StopPoint の ID検索と範囲検索のみを扱う。
+servers:
+  - url: https://api.example.com
+tags:
+  - name: health
+    description: ヘルスチェック
+  - name: stop-points
+    description: 一時停止警告対象地点
+paths:
+  /api/v1/health:
+    get:
+      tags: [health]
+      operationId: getHealth
+      summary: Health check
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              examples:
+                ok:
+                  value:
+                    status: ok
+                    version: v1
+
+  /api/v1/stop-points:
+    get:
+      tags: [stop-points]
+      operationId: getStopPointsByRange
+      summary: Get stop points by range
+      description: 中心座標と検索半径を指定して StopPoint を取得する。
+      parameters:
+        - $ref: "#/components/parameters/Lat"
+        - $ref: "#/components/parameters/Long"
+        - $ref: "#/components/parameters/Radius"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: Stop point list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StopPointRangeResponse"
+              examples:
+                sample:
+                  value:
+                    - uniqueKey: "1"
+                      az: "197"
+                      lat: "35.0700971"
+                      long: "136.8764412"
+        "400":
+          description: Invalid query
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /api/v1/stop-points/{id}:
+    get:
+      tags: [stop-points]
+      operationId: getStopPointById
+      summary: Get stop point by ID
+      parameters:
+        - $ref: "#/components/parameters/StopPointId"
+      responses:
+        "200":
+          description: Stop point detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StopPointDetailResponse"
+              examples:
+                sample:
+                  value:
+                    uniqueKey: "1"
+                    az: "197"
+                    lat: "35.0700971"
+                    long: "136.8764412"
+                    created_at: "2026-01-01T00:00:00Z"
+                    updated_at: "2026-01-02T00:00:00Z"
+        "404":
+          description: Stop point not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  parameters:
+    Lat:
+      name: lat
+      in: query
+      required: true
+      description: 検索中心の緯度。
+      schema:
+        type: number
+        format: double
+        minimum: -90
+        maximum: 90
+    Long:
+      name: long
+      in: query
+      required: true
+      description: 検索中心の経度。
+      schema:
+        type: number
+        format: double
+        minimum: -180
+        maximum: 180
+    Radius:
+      name: radius
+      in: query
+      required: true
+      description: 検索半径。メートル単位。
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: 最大取得件数。未指定時は 500。
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        default: 500
+    StopPointId:
+      name: id
+      in: path
+      required: true
+      description: StopPoint の識別子。
+      schema:
+        type: string
+
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - version
+      properties:
+        status:
+          type: string
+          enum: [ok]
+          example: ok
+        version:
+          type: string
+          example: v1
+
+    StopPointRangeResponseItem:
+      type: object
+      required:
+        - uniqueKey
+        - az
+        - lat
+        - long
+      properties:
+        uniqueKey:
+          type: string
+          example: "1"
+        az:
+          type: string
+          example: "197"
+        lat:
+          type: string
+          example: "35.0700971"
+        long:
+          type: string
+          example: "136.8764412"
+
+    StopPointRangeResponse:
+      type: array
+      items:
+        $ref: "#/components/schemas/StopPointRangeResponseItem"
+
+    StopPointDetailResponse:
+      allOf:
+        - $ref: "#/components/schemas/StopPointRangeResponseItem"
+        - type: object
+          required:
+            - created_at
+            - updated_at
+          properties:
+            created_at:
+              type: string
+              format: date-time
+              example: "2026-01-01T00:00:00Z"
+            updated_at:
+              type: string
+              format: date-time
+              example: "2026-01-02T00:00:00Z"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          $ref: "#/components/schemas/ErrorBody"
+
+    ErrorBody:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - INVALID_QUERY
+            - STOP_POINT_NOT_FOUND
+            - INTERNAL_ERROR
+        message:
+          type: string
