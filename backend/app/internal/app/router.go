@@ -1,7 +1,6 @@
 package app
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -10,7 +9,7 @@ import (
 	"github.com/NKC-CV2026/Graduation-research/backend/app/internal/handler"
 )
 
-func NewRouter(healthHandler *handler.HealthHandler) http.Handler {
+func NewRouter(healthHandlers *handler.HealthHandlers, stopPointHandlers *handler.StopPointHandlers) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -18,7 +17,9 @@ func NewRouter(healthHandler *handler.HealthHandler) http.Handler {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Timeout(10 * time.Second))
 
-	r.Get("/health", healthHandler.Get)
+	r.Get("/api/v1/health", healthHandlers.Get)
+	r.Get("/api/v1/stop-points", stopPointHandlers.GetByRange)
+	r.Get("/api/v1/stop-points/{id}", stopPointHandlers.GetByID)
 
 	return r
 }
