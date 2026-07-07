@@ -16,6 +16,8 @@ type StopPointRepository struct {
 	stopPoints []domain.StopPoint
 }
 
+const maxStopPointRangeResults = 500
+
 type stopPointRecord struct {
 	UniqueKey string `json:"uniqueKey"`
 	AZ        string `json:"az"`
@@ -79,6 +81,12 @@ func (r *StopPointRepository) FindByID(_ context.Context, id string) (domain.Sto
 
 func (r *StopPointRepository) FindByRange(_ context.Context, input domain.GetStopPointsByRangeInput) ([]domain.StopPoint, error) {
 	limit := input.Limit
+	if limit < 0 {
+		limit = 0
+	}
+	if limit > maxStopPointRangeResults {
+		limit = maxStopPointRangeResults
+	}
 	if limit > len(r.stopPoints) {
 		limit = len(r.stopPoints)
 	}
