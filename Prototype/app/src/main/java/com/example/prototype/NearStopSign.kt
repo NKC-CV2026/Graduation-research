@@ -5,6 +5,9 @@ import android.location.Location
 import org.json.JSONArray
 import android.util.Log
 import java.io.File
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.net.URL
 
 
 // 一時停止標識のデータを読み込み
@@ -14,14 +17,18 @@ class NearStopSign() {
     val stopPoints = mutableListOf<Map<String, Any>>()
 
     // rawフォルダ内のJSONファイルから一時停止標識データを読み込む
-    fun setStopPoints(context: Context){
-        val inputjson = context.resources.openRawResource( R.raw.port)
-        val file = File(context.filesDir, "stop_points.json")
-        val inputString = if (file.exists()){
-            file.readText()
-        }else {
-            inputjson.bufferedReader().use { it.readText() }
-        }
+    fun setStopPoints(context: Context,lat: Double,long: Double){
+        Log.e("test","data:${downloadJson(lat,long)}")
+//        val inputjson = URL("https://8etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300")//context.resources.openRawResource( R.raw.outputstop)
+//        val file = File(context.filesDir, "stop_points.json")
+        val url = URL("https://8etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300")
+        val inputString = url.readText()
+//            if (file.exists()){
+//            file.readText()
+////            downloadJson(lat,long)
+//        }else {
+//            inputjson.bufferedReader().use { it.readText() }
+//        }
         val inputArray = JSONArray(inputString)
         // 前回のデータが残らないように一度空にする
         stopPoints.clear()
@@ -104,7 +111,17 @@ class NearStopSign() {
             matchRoadPoints
         )
     }
+    fun downloadJson(lat: Double,long: Double) : String{
+        val client = OkHttpClient()
 
+        val request = Request.Builder()
+            .url("https://8etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300")
+            .build()
+
+        val response = client.newCall(request).execute()
+        return response.toString()
+//        println(response.body?.string())
+    }
     // 横の道や後ろ側の標識を除外するための絞り込み
     private fun matchRoadSide(
         nowLat: Double,
