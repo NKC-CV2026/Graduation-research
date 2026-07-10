@@ -139,7 +139,13 @@ variable "enable_secretsmanager_endpoint" {
 variable "enable_kms_endpoint" {
   description = "Whether to create a KMS VPC endpoint for the migration task."
   type        = bool
-  default     = true
+  default     = false
+}
+
+variable "enable_vpc_endpoints" {
+  description = "Whether to create VPC endpoints during an apply."
+  type        = bool
+  default     = false
 }
 
 variable "tags" {
