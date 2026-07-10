@@ -3,29 +3,13 @@ package com.example.prototype
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-//import android.health.connect.datatypes.ExerciseRoute
 import android.os.Bundle
-//import android.location.Location
-//import android.os.Looper
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-//import androidx.core.view.ViewCompat
-//import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
 import com.example.prototype.databinding.ActivityMainBinding
-//import com.google.android.gms.location.FusedLocationProviderClient
-//import com.google.android.gms.location.LocationCallback
-//import com.google.android.gms.location.LocationRequest
-//import com.google.android.gms.location.LocationResult
-//import com.google.android.gms.location.LocationServices
-//import com.google.android.gms.location.Priority
-//import com.example.prototype.LocationGetter
-//import com.example.prototype.NearStopSign
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import androidx.appcompat.app.AlertDialog
 import android.widget.Button
 import android.widget.RadioButton
@@ -36,24 +20,35 @@ import android.widget.RadioGroup
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+
+    // 位置情報取得クラス
     private lateinit var locationGetter: LocationGetter
+
+    // 一時停止標識検索クラス
     private lateinit var nearStopSign: NearStopSign
     private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+
+    // 監視状態管理用
     private var isMonitoring = false
+
+    // 距離判定クラス
     private lateinit var distanceChecker: DistanceChecker
 
+    // 初回起動判定クラス
     private lateinit var checker: FirstLaunchCheck
     @RequiresPermission(anyOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     private val LOCATION_PERMISSION_REQUEST_CODE = 100
+    // Activity生成時に呼ばれる
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        // 初回起動時のみ設定ダイアログを表示する
         checker = FirstLaunchCheck(this)
         //テスト中のみ(毎回初回起動判定にする)
         checker.resetFirstLaunch()
+        // 初回起動の場合のみ通知方法を選択する
         if(checker.isFirstLaunch()) {
             val dialogView = layoutInflater.inflate(
                 R.layout.dialog_mode_settings,
@@ -160,8 +155,11 @@ class MainActivity : AppCompatActivity() {
         distanceChecker = DistanceChecker(this)
         nearStopSign = NearStopSign()
 //        nearStopSign.setStopPoints(this)
+        // 監視開始・停止ボタン
         binding.locationBtn.setOnClickListener() {
+            // 監視状態を切り替える
             isMonitoring = !isMonitoring
+            // 監視開始時の処理
             if (isMonitoring){
 //                distanceChecker.stopSuccsesCount = 0
 //                distanceChecker.stopPointsCount = 0
@@ -174,6 +172,7 @@ class MainActivity : AppCompatActivity() {
                     ) != PackageManager.PERMISSION_GRANTED
                 ) {
                     Log.e("位置情報", "権限が許可されてないよ")
+                    // 位置情報権限が無い場合は取得する
                     ActivityCompat.requestPermissions(
                         this,
                         arrayOf(
@@ -233,7 +232,7 @@ class MainActivity : AppCompatActivity() {
                         //ボタン押して少ししたら出るエラークラッシュする
                     }
                 }*/
-                //バックグラウンド追加分
+                // フォアグラウンドサービスを開始する （アプリを閉じても監視を継続できる）
                 ContextCompat.startForegroundService(
                     this,
                     Intent(
@@ -245,7 +244,7 @@ class MainActivity : AppCompatActivity() {
 //                distanceChecker.startChecking()
             }else{
                 //locationGetter.stopLocationonUpdate()
-                //バックグラウンド追加分 
+                // フォアグラウンドサービス停止
                 stopService(
                     Intent(
                         this,
@@ -261,17 +260,20 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+
+        // レポート画面へ遷移
         binding.btnReport.setOnClickListener {
             Log.e("btncheack","クリック")
             val intent = Intent(
                 this,
                 ReportActivity::class.java
             )
-            intent.putExtra("STOP_SUCCSES_COUNT",distanceChecker.stopSuccsesCount)
-            intent.putExtra("STOP_POINTS_COUNT",distanceChecker.stopPointsCount)
+//            intent.putExtra("STOP_SUCCSES_COUNT",distanceChecker.stopSuccsesCount)
+//            intent.putExtra("STOP_POINTS_COUNT",distanceChecker.stopPointsCount)
             startActivity(intent)
         }
 
+        // 設定ダイアログ表示
         binding.btnSettings.setOnClickListener {
             val settingsView =layoutInflater.inflate(
                 R.layout.activity_setting,
@@ -340,7 +342,7 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
+    // Activity終了時に位置情報取得を停止する
     override fun onDestroy() {
         super.onDestroy()
         locationGetter.stopLocationonUpdate()

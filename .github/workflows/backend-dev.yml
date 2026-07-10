@@ -352,6 +352,7 @@ jobs:
             -input=false \
             -auto-approve \
             -no-color \
+            -var "enable_vpc_endpoints=true" \
             -var "app_image_uri=${{ needs.prepare-image.outputs.image_uri }}"
 
       - name: Capture Migration Terraform Outputs
@@ -385,6 +386,17 @@ jobs:
 
       - name: Terraform Apply Application
         run: terraform apply -input=false -auto-approve -no-color -var "app_image_uri=${{ needs.prepare-image.outputs.image_uri }}"
+
+      - name: Terraform Cleanup Migration Endpoints
+        if: always()
+        run: |
+          terraform apply \
+            -target=module.vpc_endpoints \
+            -input=false \
+            -auto-approve \
+            -no-color \
+            -var "enable_vpc_endpoints=false" \
+            -var "app_image_uri=${{ needs.prepare-image.outputs.image_uri }}"
 
       - name: Capture Application Terraform Outputs
         id: app-tf

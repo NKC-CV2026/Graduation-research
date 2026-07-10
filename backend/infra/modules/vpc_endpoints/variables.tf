@@ -31,17 +31,23 @@ variable "allowed_security_group_ids" {
 variable "enable_secretsmanager" {
   description = "Whether to create a Secrets Manager interface endpoint."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "enable_kms" {
   description = "Whether to create a KMS interface endpoint."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "tags" {
   description = "Common tags applied to resources."
   type        = map(string)
   default     = {}
+}
+
+variable "enable_vpc_endpoints" {
+  description = "Whether to create VPC endpoints."
+  type        = bool
+  default     = false
 }

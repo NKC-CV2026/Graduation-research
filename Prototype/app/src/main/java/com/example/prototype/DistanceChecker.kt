@@ -7,32 +7,46 @@ import android.location.Location
 import android.media.MediaPlayer
 import android.os.Vibrator
 import android.os.VibrationEffect
-import com.example.prototype.LocationGetter
-import kotlin.math.sin
 
-
+// 選ばれた一時停止標識との距離を確認
+// 音声・バイブ通知と一時停止回数のカウントを行うクラス
 class DistanceChecker(private val context: Context) {
+    // 一時停止できた回数
     var stopSuccsesCount = 0
+
+    // 通過した一時停止標識の回数
     var stopPointsCount = 0
+
+    // 現在検知対象になっている標識の緯度・経度
     var targetLatitude: Double? = null //目的地緯度
     var targetLongitude: Double? = null //目的地経度
 
+    // 現在地の緯度・経度
     var nowLatitude: Double? = null//現在地緯度
     var nowLongtitude: Double? = null//現在地経度
 
+    // 現在の速度
     var nowSpeed = 100f
 
+    var unStopSign = mutableListOf<String>()
+
+    // この距離以内に入ったら警告を鳴らす
     val detectDistance = 30f //接近を検知する距離
 
+    // 前回計算した標識までの距離
     var previousDistance = -1f //
 
+    // 同じ標識に対して再度カウントしないためのフラグ
     var isChecks = true
+
+    // 現在対象になっている標識のID
+    var targetUniqueKey: String = ""
 
 
     private var mediaPlayer: MediaPlayer? = null //メディアプレイヤー
-
     private var vibrator: Vibrator? = null //バイブレーション
 
+    // バイブレーションのパターン
     val pattern = longArrayOf(0, 500, 300, 500) //バイブレーションパターン
 
     //将来的に消す
@@ -48,7 +62,7 @@ class DistanceChecker(private val context: Context) {
         mediaPlayer = MediaPlayer.create(context,R.raw.alert_tsumugi)
         //ループ再生するように
         mediaPlayer?.isLooping = true
-
+        // バイブレーションを使えるようにする
         vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
     }
@@ -56,10 +70,12 @@ class DistanceChecker(private val context: Context) {
 //    override
     fun run() {
         val results = FloatArray(1)
+        // 必要な値がまだ入っていない場合は処理をしない
         targetLatitude ?: return
         targetLongitude ?: return
         nowLongtitude ?: return
         nowLatitude ?: return
+        // 現在地から対象標識までの距離を計算する
         Location.distanceBetween(
             nowLatitude!!,
             nowLongtitude!!,
@@ -68,16 +84,17 @@ class DistanceChecker(private val context: Context) {
             results
         )
         val distance = results[0]
-        val bearing = bearing()
-        val radians = Math.toRadians(bearing.toDouble())
-        val roadCheck = Math.abs(sin(radians) * distance)
+//        val bearing = bearing()
+//        val radians = Math.toRadians(bearing.toDouble())
+//        val roadCheck = Math.abs(cos(radians) * distance)
 
         Log.d("DistanceCheck", "距離 = $distance")
 
-        // 前回との比較
+        // 前回より距離が大きくなった場合は、標識から遠ざかっていると判断する
         if (previousDistance != -1f) {
             if (distance > previousDistance) {
                 Log.d("DistanceCheck", "遠ざかっています")
+                // 遠ざかり始めたら警告音を止める
                 if (mediaPlayer?.isPlaying == true) {
                     //音声アラート停止
                     mediaPlayer?.pause()
@@ -88,17 +105,30 @@ class DistanceChecker(private val context: Context) {
                 //ここで次の一時停止地点を探すようにする
             }
         }
-
-        if (isChecks && distance <= detectDistance && roadCheck <= 5) {
-            if (distance <= 5f){
+//    Log.e("test","${roadCheck}")
+        // まだこの標識を判定していない、かつ30m以内に入った場合
+        if (isChecks && distance <= detectDistance /*&& roadCheck <= 5*/) {
+            // カウント確認用ログ
+            Log.e(
+                "COUNT_CHECK",
+                "key=$targetUniqueKey distance=$distance speed=$nowSpeed"
+            )
+            // 標識から10m以内に入ったら、通過対象としてカウントする
+            if (distance <= 10f){
                 stopPointsCount++
-                isChecks = false
+                unStopSign.add(targetUniqueKey)
+//                isChecks = false
+                // 速度が5以下なら一時停止成功としてカウントする (現在はテスト用の値。本番ではもっと低い値にする予定)
                 if (nowSpeed <= 5f){
                     stopSuccsesCount++
+                    unStopSign.remove(targetUniqueKey)
                     Log.e("test","一時停止")
                 }
+                // 同じ標識で何度もカウントしないようにする
+                isChecks = false
             }
             Log.d("DistanceCheck", "接近しました！")
+            // 警告音が鳴っていなければ再生する
             if (mediaPlayer?.isPlaying != true) {
                 //音声ファイルを開始時に戻し、再生
                 mediaPlayer?.seekTo(0)
@@ -119,7 +149,7 @@ class DistanceChecker(private val context: Context) {
                 )
             }
         }
-
+        // 次回比較するために、今回の距離を保存する
         previousDistance = distance
 
 
@@ -135,24 +165,24 @@ class DistanceChecker(private val context: Context) {
 //
     }
 
-    fun bearing(): Float {
-        // 目的地点
-        val startLocation = Location("start").apply {
-            latitude = targetLatitude!!
-            longitude = targetLongitude!!
-        }
-
-        // 現在地点
-        val endLocation = Location("end").apply {
-            latitude = nowLatitude!!
-            longitude = nowLongtitude!!
-        }
-
-        // bearingTo() で方位角を取得
-        val bearing = startLocation.bearingTo(endLocation) % 180
-
-        return bearing
-    }
+//    fun bearing(): Float {
+//        // 目的地点
+//        val startLocation = Location("start").apply {
+//            latitude = targetLatitude!!
+//            longitude = targetLongitude!!
+//        }
+//
+//        // 現在地点
+//        val endLocation = Location("end").apply {
+//            latitude = nowLatitude!!
+//            longitude = nowLongtitude!!
+//        }
+//
+//        // bearingTo() で方位角を取得
+//        val bearing = startLocation.bearingTo(endLocation) //% 180
+//
+//        return bearing
+//    }
 
 
     // 開始　将来的に消す

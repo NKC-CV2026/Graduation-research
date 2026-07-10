@@ -1,4 +1,6 @@
 locals {
+  endpoint_count = var.enable_vpc_endpoints ? 1 : 0
+
   interface_services = merge(
     {
       ecr_api = "com.amazonaws.${var.region}.ecr.api"
@@ -11,6 +13,8 @@ locals {
 }
 
 resource "aws_security_group" "endpoints" {
+  count = local.endpoint_count
+
   name        = "${var.name_prefix}-endpoints"
   description = "Security group for VPC interface endpoints"
   vpc_id      = var.vpc_id
@@ -28,24 +32,24 @@ resource "aws_security_group" "endpoints" {
 }
 
 resource "aws_security_group_rule" "https_from_app" {
-  count = length(var.allowed_security_group_ids)
+  count = local.endpoint_count * length(var.allowed_security_group_ids)
 
   type                     = "ingress"
   from_port                = 443
   to_port                  = 443
   protocol                 = "tcp"
   source_security_group_id = var.allowed_security_group_ids[count.index]
-  security_group_id        = aws_security_group.endpoints.id
+  security_group_id        = aws_security_group.endpoints[0].id
 }
 
 resource "aws_vpc_endpoint" "interface" {
-  for_each = local.interface_services
+  for_each = var.enable_vpc_endpoints ? local.interface_services : {}
 
   vpc_id              = var.vpc_id
   service_name        = each.value
   vpc_endpoint_type   = "Interface"
   subnet_ids          = var.subnet_ids
-  security_group_ids  = [aws_security_group.endpoints.id]
+  security_group_ids  = [aws_security_group.endpoints[0].id]
   private_dns_enabled = true
 
   tags = merge(var.tags, {
@@ -54,6 +58,8 @@ resource "aws_vpc_endpoint" "interface" {
 }
 
 resource "aws_vpc_endpoint" "s3" {
+  count = local.endpoint_count
+
   vpc_id            = var.vpc_id
   service_name      = "com.amazonaws.${var.region}.s3"
   vpc_endpoint_type = "Gateway"

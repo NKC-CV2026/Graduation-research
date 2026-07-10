@@ -1,6 +1,7 @@
 package com.example.prototype
 
 import android.content.Context
+import androidx.core.content.edit
 
 class FirstLaunchCheck(private val context: Context) {
     private val prefs = context.getSharedPreferences(
@@ -22,7 +23,7 @@ class FirstLaunchCheck(private val context: Context) {
                 KEY_FIRST_LAUNCH,
                 false
             )
-            .apply()
+        }
     }
 
     // 追加：初回起動状態に戻す
@@ -32,7 +33,7 @@ class FirstLaunchCheck(private val context: Context) {
                 KEY_FIRST_LAUNCH,
                 true
             )
-            .apply()
+        }
     }
 
     fun saveAlertMode(mode: String) {

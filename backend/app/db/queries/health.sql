@@ -1,2 +1,2 @@
 -- name: HealthCheck :one
-SELECT 1 AS status;
+SELECT $1::int AS status;
