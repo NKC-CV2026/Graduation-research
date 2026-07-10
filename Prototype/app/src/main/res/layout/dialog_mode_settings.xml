@@ -104,6 +104,46 @@
             android:layout_height="wrap_content"/>
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/bothmode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/both" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingStart="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_bothTitle"
+                android:textStyle="bold"
+                android:textSize="15sp"/>
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/settings_bothMessage"
+                android:textSize="12sp"/>
+        </LinearLayout>
+
+        <RadioButton
+            android:id="@+id/radioBoth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
     <!-- ボタン -->
     <Button
         android:id="@+id/btnOk"

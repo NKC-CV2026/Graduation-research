@@ -10,7 +10,7 @@ class FirstLaunchCheck(private val context: Context) {
     //初回起動かどうか
     fun isFirstLaunch(): Boolean {
         return  prefs.getBoolean(
-            "first_launch",
+            KEY_FIRST_LAUNCH,
             true
         )
     }
@@ -19,7 +19,7 @@ class FirstLaunchCheck(private val context: Context) {
     fun setFirstLaunchFinished() {
         prefs.edit()
             .putBoolean(
-                "first_launch",
+                KEY_FIRST_LAUNCH,
                 false
             )
             .apply()
@@ -29,9 +29,34 @@ class FirstLaunchCheck(private val context: Context) {
     fun resetFirstLaunch() {
         prefs.edit()
             .putBoolean(
-                "first_launch",
+                KEY_FIRST_LAUNCH,
                 true
             )
             .apply()
+    }
+
+    fun saveAlertMode(mode: String) {
+        prefs.edit()
+            .putString(
+                KEY_ALERT_MODE,
+                mode
+            )
+            .apply()
+    }
+
+    fun getAlertMode(): String {
+        return prefs.getString(
+            KEY_ALERT_MODE,
+            MODE_SOUND
+        ) ?: MODE_SOUND
+    }
+
+    companion object {
+        private const val KEY_FIRST_LAUNCH = "first_launch"
+        private const val KEY_ALERT_MODE = "alert_mode"
+
+        const val MODE_SOUND = "sound"
+        const val MODE_VIBRATION = "vibration"
+        const val MODE_BOTH = "both"
     }
 }

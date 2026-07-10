@@ -5,8 +5,10 @@
     <string name="btn_offLocation">OFF</string>
     <string name="settings_soundTitle">音声モード</string>
     <string name="settings_vibrationTitle">振動モード</string>
+    <string name="settings_bothTitle">音声+振動モード</string>
     <string name="settings_soundMessage">自転車に取り付けて運用する人におすすめ</string>
     <string name="settings_vibrationMessage">ポケットに入れて運用する人におすすめ</string>
+    <string name="settings_bothMessage">確実に止まりたい人におすすめ</string>
     <string name="settings_title">初回起動</string>
     <string name="settings_subTitle">使用するモードを選択してください</string>
     <string name="settings_dicedBtn">決定</string>
