@@ -17,32 +17,40 @@ class NearStopSign() {
     val stopPoints = mutableListOf<Map<String, Any>>()
 
     // rawフォルダ内のJSONファイルから一時停止標識データを読み込む
-    fun setStopPoints(context: Context,lat: Double,long: Double){
-        Log.e("test","data:${downloadJson(lat,long)}")
+    fun setStopPoints(context: Context, lat: Double, long: Double) {
 //        val inputjson = URL("https://8etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300")//context.resources.openRawResource( R.raw.outputstop)
 //        val file = File(context.filesDir, "stop_points.json")
+        try {
+//            val url =
+//                URL("https://etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300") //誤URL
         val url = URL("https://8etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300")
-        val inputString = url.readText()
+            val inputString = url.readText()
 //            if (file.exists()){
 //            file.readText()
 ////            downloadJson(lat,long)
 //        }else {
 //            inputjson.bufferedReader().use { it.readText() }
 //        }
-        val inputArray = JSONArray(inputString)
-        // 前回のデータが残らないように一度空にする
-        stopPoints.clear()
-        for (i in 0 ..< inputArray.length()){
-            val obj = inputArray.getJSONObject(i)
-            stopPoints.add(
-                mapOf(
-                    "uniqueKey" to obj.getString("uniqueKey"), // 標識を識別するID
-                    "long" to obj.getDouble("lon"),  // 経度
-                    "lat" to obj.getDouble("lat"), // 緯度
-                    "bearing" to obj.getInt("az") // 標識の進入方向
-                )
-            )
+            if (!inputString.isEmpty()) {
+                val inputArray = JSONArray(inputString)
+                // 前回のデータが残らないように一度空にする
+                stopPoints.clear()
+                for (i in 0..<inputArray.length()) {
+                    val obj = inputArray.getJSONObject(i)
+                    stopPoints.add(
+                        mapOf(
+                            "uniqueKey" to obj.getString("uniqueKey"), // 標識を識別するID
+                            "long" to obj.getDouble("long"),  // 経度
+                            "lat" to obj.getDouble("lat"), // 緯度
+                            "bearing" to obj.getInt("az") // 標識の進入方向
+                        )
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("test", "通信エラー")
         }
+
     }
 
     // 自転車の進行方向と標識の向きが近いものだけを残す
@@ -53,7 +61,7 @@ class NearStopSign() {
         return stopPoints.filter { stop ->
             val bearing = (stop["bearing"] as Int).toFloat()
             val diff = getBearingDiff(
-                userBearing,bearing
+                userBearing, bearing
             )
             // 進行方向との差が15度以内の標識だけ候補にする
             diff <= 15f
@@ -62,29 +70,46 @@ class NearStopSign() {
     }
 
     // 2つの方位角の差を0〜180度の範囲で求める
-    private fun getBearingDiff(a: Float,b: Float): Float{
-        val diff = kotlin.math.abs(a-b)
+    private fun getBearingDiff(a: Float, b: Float): Float {
+        val diff = kotlin.math.abs(a - b)
         // 例：350度と10度は差340度ではなく20度として扱う
         return kotlin.math.min(
             diff,
-            360f-diff
+            360f - diff
         )
     }
+
     // 候補の中から現在地に一番近い標識を返す
-    private fun matchNearestStop(nowLat: Double,nowLong: Double, matchBearingPoints:List<Map<String, Any>>):Map<String, Any>?{
+    private fun matchNearestStop(
+        nowLat: Double,
+        nowLong: Double,
+        matchBearingPoints: List<Map<String, Any>>
+    ): Map<String, Any>? {
         var results = FloatArray(3)
         val distances = mutableListOf<Float>()
         if (matchBearingPoints.isEmpty()) return null
         // 各候補との距離を計算する
-        for (i in 0..< matchBearingPoints.size){
-            Location.distanceBetween(nowLat,nowLong,matchBearingPoints[i]["lat"] as Double,matchBearingPoints[i]["long"] as Double, results)
+        for (i in 0..<matchBearingPoints.size) {
+            Location.distanceBetween(
+                nowLat,
+                nowLong,
+                matchBearingPoints[i]["lat"] as Double,
+                matchBearingPoints[i]["long"] as Double,
+                results
+            )
             distances.add(results[0])
         }
         // 距離が一番短い標識を返す
         return matchBearingPoints[distances.indexOf(distances.minOrNull())]
     }
+
     // 現在地・進行方向から、反応させるべき一時停止標識を1つ返す
-    fun matchStopSing(lat: Double,long: Double,bearing: Float,stopPoints: List<Map<String, Any>>):Map<String, Any>?{
+    fun matchStopSing(
+        lat: Double,
+        long: Double,
+        bearing: Float,
+        stopPoints: List<Map<String, Any>>
+    ): Map<String, Any>? {
         // まず進行方向が合う標識だけに絞る
         var matchBearingPoints =
             matchBearing(bearing, stopPoints)
@@ -111,7 +136,8 @@ class NearStopSign() {
             matchRoadPoints
         )
     }
-    fun downloadJson(lat: Double,long: Double) : String{
+
+    fun downloadJson(lat: Double, long: Double): String {
         val client = OkHttpClient()
 
         val request = Request.Builder()
@@ -122,6 +148,7 @@ class NearStopSign() {
         return response.toString()
 //        println(response.body?.string())
     }
+
     // 横の道や後ろ側の標識を除外するための絞り込み
     private fun matchRoadSide(
         nowLat: Double,
