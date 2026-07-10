@@ -34,6 +34,7 @@ module "vpc_endpoints" {
   subnet_ids                 = module.network.private_subnet_ids
   route_table_ids            = module.network.private_route_table_ids
   allowed_security_group_ids = [module.network.app_security_group_id]
+  enable_vpc_endpoints       = var.enable_vpc_endpoints
   enable_secretsmanager      = var.enable_secretsmanager_endpoint
   enable_kms                 = var.enable_kms_endpoint
   tags                       = var.tags
