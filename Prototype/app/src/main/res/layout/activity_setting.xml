@@ -17,19 +17,34 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <!-- 音声 -->
-        <Switch
-            android:id="@+id/switchVoice"
-            android:text="音声通知"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+        <RadioGroup
+            android:id="@+id/radioModeGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-        <!-- バイブレーション -->
-        <Switch
-            android:id="@+id/switchVibration"
-            android:text="バイブレーション"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            <!-- 音声 -->
+            <RadioButton
+                android:id="@+id/radioSound"
+                android:text="@string/settings_soundTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <!-- バイブレーション -->
+            <RadioButton
+                android:id="@+id/radioVibration"
+                android:text="@string/settings_vibrationTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <!-- 音声+バイブレーション-->
+            <RadioButton
+                android:id="@+id/radioBoth"
+                android:text="@string/settings_bothTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </RadioGroup>
 
         <!-- テスト -->
         <Button

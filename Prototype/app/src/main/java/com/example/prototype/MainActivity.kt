@@ -15,6 +15,7 @@ import android.widget.Button
 import android.widget.RadioButton
 import androidx.core.content.ContextCompat
 import android.os.Build
+import android.widget.RadioGroup
 
 
 class MainActivity : AppCompatActivity() {
@@ -65,33 +66,74 @@ class MainActivity : AppCompatActivity() {
             val radioVibe = dialogView.findViewById<RadioButton>(
                 R.id.radioVibe
             )
-            //未選択を防ぐために音声モードを最初に選択させてる
-            radioMusic.isChecked = true
+            val radioBoth = dialogView.findViewById<RadioButton>(
+                R.id.radioBoth
+            )
 
-            radioMusic.setOnClickListener {
-                radioVibe.isChecked = false
+            val saveMode = checker.getAlertMode()
+
+            when (saveMode) {
+                FirstLaunchCheck.MODE_SOUND -> {
+                    radioMusic.isChecked = true
+                    radioVibe.isChecked = false
+                    radioBoth.isChecked = false
+                }
+
+                FirstLaunchCheck.MODE_VIBRATION -> {
+                    radioMusic.isChecked = false
+                    radioVibe.isChecked = true
+                    radioBoth.isChecked = false
+                }
+
+                FirstLaunchCheck.MODE_BOTH -> {
+                    radioMusic.isChecked = false
+                    radioVibe.isChecked = false
+                    radioBoth.isChecked = true
+                }
             }
 
+            radioMusic.setOnClickListener {
+                radioMusic.isChecked = true
+                radioVibe.isChecked = false
+                radioBoth.isChecked = false
+            }
 
             radioVibe.setOnClickListener {
                 radioMusic.isChecked = false
+                radioVibe.isChecked = true
+                radioBoth.isChecked = false
+            }
+
+            radioBoth.setOnClickListener {
+                radioMusic.isChecked = false
+                radioVibe.isChecked = false
+                radioBoth.isChecked = true
             }
             val btnOk = dialogView.findViewById<Button>(
                 R.id.btnOk
             )
             btnOk.setOnClickListener {
-                //ラジオボタンの洗濯したもの取得(現在はログになってます)
+                //ラジオボタンの選択したもの取得(現在はログになってます)
                 if (radioMusic.isChecked) {
+                    checker.saveAlertMode(
+                        FirstLaunchCheck.MODE_SOUND
+                    )
 
                     Log.e("MODE", "音声モード")
 
                 } else if (radioVibe.isChecked) {
+                    checker.saveAlertMode(
+                        FirstLaunchCheck.MODE_VIBRATION
+                    )
 
                     Log.e("MODE", "バイブモード")
 
-                } else {
+                } else if (radioBoth.isChecked) {
+                    checker.saveAlertMode(
+                        FirstLaunchCheck.MODE_BOTH
+                    )
 
-                    Log.e("MODE", "未選択")
+                    Log.e("MODE", "音声+バイブモード")
 
                 }
                 dialog.dismiss()
@@ -241,8 +283,52 @@ class MainActivity : AppCompatActivity() {
                 .setView(settingsView)
                 .create()
 
+            val radioModeGroup = settingsView.findViewById<RadioGroup>(
+                R.id. radioModeGroup
+            )
+
             val Btnmap = settingsView.findViewById<Button>(R.id.btnReport)
-            // 地図画面へ遷移
+
+            when (checker.getAlertMode()) {
+                FirstLaunchCheck.MODE_SOUND -> {
+                    radioModeGroup.check(R.id.radioSound)
+                }
+
+                FirstLaunchCheck.MODE_VIBRATION -> {
+                    radioModeGroup.check(R.id.radioVibration)
+                }
+
+                FirstLaunchCheck.MODE_BOTH -> {
+                    radioModeGroup.check(R.id.radioBoth)
+                }
+
+                else -> {
+                    radioModeGroup.check(R.id.radioSound)
+                }
+            }
+
+            radioModeGroup.setOnCheckedChangeListener { _: RadioGroup, checkedId: Int ->
+                when (checkedId) {
+                    R.id.radioSound -> {
+                        checker.saveAlertMode(
+                            FirstLaunchCheck.MODE_SOUND
+                        )
+                    }
+
+                    R.id.radioVibration -> {
+                        checker.saveAlertMode(
+                            FirstLaunchCheck.MODE_VIBRATION
+                        )
+                    }
+
+                    R.id.radioBoth -> {
+                        checker.saveAlertMode(
+                            FirstLaunchCheck.MODE_BOTH
+                        )
+                    }
+                }
+            }
+
             Btnmap.setOnClickListener {
                 val intent = Intent (
                     this,
