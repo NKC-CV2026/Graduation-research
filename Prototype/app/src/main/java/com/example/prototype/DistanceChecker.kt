@@ -122,7 +122,7 @@ class DistanceChecker(private val context: Context) {
                 if (nowSpeed <= 5f){
                     stopSuccsesCount++
                     unStopSign.remove(targetUniqueKey)
-                    Log.e("test","一時停止")
+                    Log.d("test","一時停止")
                 }
                 // 同じ標識で何度もカウントしないようにする
                 isChecks = false

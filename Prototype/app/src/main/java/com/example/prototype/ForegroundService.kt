@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
-import android.health.connect.datatypes.ExerciseRoute
 import android.location.Location
 import android.os.Build
 import android.os.IBinder

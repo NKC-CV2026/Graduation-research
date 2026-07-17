@@ -4,14 +4,11 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isInvisible
 import com.example.prototype.databinding.ActivityMainBinding
-import kotlinx.coroutines.MainScope
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
-import androidx.core.content.ContextCompat
 
 class MapActivity : AppCompatActivity() {
 
