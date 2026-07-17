@@ -4,7 +4,6 @@ import android.content.Context
 import android.location.Location
 import org.json.JSONArray
 import android.util.Log
-import java.io.File
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URL
@@ -23,14 +22,10 @@ class NearStopSign() {
         try {
 //            val url =
 //                URL("https://etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300") //誤URL
-        val url = URL("https://8etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300")
-            val inputString = url.readText()
-//            if (file.exists()){
-//            file.readText()
-////            downloadJson(lat,long)
-//        }else {
-//            inputjson.bufferedReader().use { it.readText() }
-//        }
+            val url = URL("https://8etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300")
+//            val inputString = url.readText()
+            val inputjson = context.resources.openRawResource( R.raw.test)
+            val inputString = inputjson.bufferedReader().use { it.readText() }
             if (!inputString.isEmpty()) {
                 val inputArray = JSONArray(inputString)
                 // 前回のデータが残らないように一度空にする
