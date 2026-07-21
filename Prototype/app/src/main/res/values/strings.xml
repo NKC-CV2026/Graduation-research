@@ -15,4 +15,6 @@
     <string name="backBtn">戻る</string>
     <string name="zoomInBtn">+</string>
     <string name="zoomOutBtn">-</string>
+    <string name="status_on">動作中</string>
+    <string name="status_off">停止中</string>
 </resources>

@@ -186,6 +186,7 @@ class MainActivity : AppCompatActivity() {
                 }
                 //locationGetter.startLocationUpdate()
                 binding.locationBtn.text = getString(R.string.btn_onLocation)
+                binding.statusText.text = getString(R.string.status_on)
                 /*lifecycleScope.launch {
                     while (isMonitoring) {
                         //近くの一時停止標識の配列の設定
@@ -252,6 +253,7 @@ class MainActivity : AppCompatActivity() {
                     )
                 )
                 binding.locationBtn.text = getString(R.string.btn_offLocation)
+                binding.statusText.text = getString(R.string.status_off)
 //                Log.e("test","停止した一時停止${distanceChecker.stopSuccsesCount}")
 //                Log.e("test","接近した一時停止${distanceChecker.stopPointsCount}")
                 // 距離判定停止
