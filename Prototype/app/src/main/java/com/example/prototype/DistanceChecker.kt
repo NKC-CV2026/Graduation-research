@@ -42,6 +42,7 @@ class DistanceChecker(private val context: Context) {
     // 現在対象になっている標識のID
     var targetUniqueKey: String = ""
 
+    private val checker = FirstLaunchCheck(context)
 
     private var mediaPlayer: MediaPlayer? = null //メディアプレイヤー
     private var vibrator: Vibrator? = null //バイブレーション
@@ -128,25 +129,33 @@ class DistanceChecker(private val context: Context) {
                 isChecks = false
             }
             Log.d("DistanceCheck", "接近しました！")
+
+            val alertMode = checker.getAlertMode()
+
             // 警告音が鳴っていなければ再生する
-            if (mediaPlayer?.isPlaying != true) {
-                //音声ファイルを開始時に戻し、再生
-                mediaPlayer?.seekTo(0)
-                mediaPlayer?.start()
+            if (alertMode == FirstLaunchCheck.MODE_SOUND || alertMode == FirstLaunchCheck.MODE_BOTH) {
+                if (mediaPlayer?.isPlaying != true) {
+                    //音声ファイルを開始時に戻し、再生
+                    mediaPlayer?.seekTo(0)
+                    mediaPlayer?.start()
+                }
             }
+
             //バイブレーション開始 (androidのバージョンによってコードが違うので分岐)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                vibrator?.vibrate(
-                    VibrationEffect.createWaveform(
+            if (alertMode == FirstLaunchCheck.MODE_VIBRATION || alertMode == FirstLaunchCheck.MODE_BOTH) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    vibrator?.vibrate(
+                        VibrationEffect.createWaveform(
+                            longArrayOf(0, 500, 300, 500),
+                            0
+                        )
+                    )
+                } else {
+                    vibrator?.vibrate(
                         longArrayOf(0, 500, 300, 500),
                         0
                     )
-                )
-            } else {
-                vibrator?.vibrate(
-                    longArrayOf(0, 500, 300, 500),
-                    0
-                )
+                }
             }
         }
         // 次回比較するために、今回の距離を保存する
