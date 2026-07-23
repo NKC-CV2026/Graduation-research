@@ -3,6 +3,7 @@ package com.example.prototype
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Looper
 import android.util.Log
 import androidx.core.app.ActivityCompat
@@ -20,6 +21,8 @@ class LocationGetter(
 ) {
     private var lat: Double? = null     // 現在地の緯度
     private var long: Double? = null    // 現在地の経度
+    private var preLat: Double? = null     // 前回の緯度
+    private var preLong: Double? = null    // 前回の経度
     private var bearing: Float? = null     // 端末の進行方向
 
     private var speed: Float = 5f    // 現在の移動速度
@@ -34,16 +37,23 @@ class LocationGetter(
             // 新しい位置情報を受信した時に実行される
             override fun onLocationResult(locationResult: LocationResult) {
                 for (location in locationResult.locations) {
+
+                    // 取得した位置情報を保存する
+                    preLat = lat
+                    lat = location.latitude
+                    preLong = long
+                    long = location.longitude
+                    bearing = if(preLat != null || preLong != null){
+                        setBearing(preLat!!,preLong!!,lat!!,long!!)
+                    }else{
+                        location.bearing
+                    }
+                    speed = location.speed
                     // 緯度・経度・方位角・速度を表示する
                     Log.e(
                         "位置情報",
                         "緯度：${location.latitude}経度：${location.longitude}方位角：${location.bearing}速度:${location.speed}"
                     )
-                    // 取得した位置情報を保存する
-                    lat = location.latitude
-                    long = location.longitude
-                    bearing = location.bearing
-                    speed = location.speed
                 }
             }
         }
@@ -105,4 +115,16 @@ class LocationGetter(
         return speed
     }
 
+    fun setBearing(preLat: Double,preLong: Double,nowLat: Double,nowLong: Double): Float{
+        val results = FloatArray(3)
+        // 現在地から標識までの距離と方位角を求める
+        Location.distanceBetween(
+            preLat,
+            preLong,
+            nowLat,
+            nowLong,
+            results
+        )
+        return results[1]
+    }
 }
