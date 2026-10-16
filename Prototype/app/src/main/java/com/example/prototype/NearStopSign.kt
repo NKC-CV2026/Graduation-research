@@ -22,7 +22,7 @@ class NearStopSign() {
         try {
 //            val url =
 //                URL("https://etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300") //誤URL
-            val url = URL("https://8etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300")
+//            val url = URL("https://8etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300")
 //            val inputString = url.readText()
             val inputjson = context.resources.openRawResource( R.raw.test)
             val inputString = inputjson.bufferedReader().use { it.readText() }
@@ -195,7 +195,7 @@ class NearStopSign() {
             // diff <= 120f：進行方向との差が120度以内の標識だけ残す
             //0〜120度 → 残す 120〜180度 → 除外 (厳密に「後ろを全部除外」したいなら diff <= 90f)
             // roadCheck <= 20f：進行方向の直線から横ズレ20m以内の標識だけ残す
-            return@filter diff <= 120f && roadCheck <= 20f
+            return@filter diff <= 90f && roadCheck <= 20f
         }
     }
 }

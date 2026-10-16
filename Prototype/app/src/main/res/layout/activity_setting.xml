@@ -49,10 +49,10 @@
         <!-- テスト -->
         <Button
             android:id="@+id/btnTest"
-            android:text="テスト実行"
-            android:layout_marginTop="16dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="テスト実行" />
 
         <!-- 距離設定 -->
         <TextView
