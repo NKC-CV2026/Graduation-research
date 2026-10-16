@@ -36,7 +36,7 @@
         android:layout_width="300dp"
         android:layout_height="100dp"
         android:layout_centerInParent="true"
-        android:background="#DDDDDD"
+        android:backgroundTint="#FF9800"
         android:text="@string/btn_offLocation"
         android:textColor="@color/white"
         android:textSize="24sp"
