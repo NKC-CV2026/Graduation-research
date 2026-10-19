@@ -16,6 +16,8 @@ import android.widget.RadioButton
 import androidx.core.content.ContextCompat
 import android.os.Build
 import android.widget.RadioGroup
+import android.widget.SeekBar
+import android.widget.TextView
 
 
 class MainActivity : AppCompatActivity() {
@@ -288,13 +290,6 @@ class MainActivity : AppCompatActivity() {
                 R.id. radioAlertModeGroup
             )
 
-            //距離用RadioGroup
-            val radioDistanceModeGroup = settingsView.findViewById<RadioGroup>(
-                R.id. radioDistanceModeGroup
-            )
-
-            val Btnmap = settingsView.findViewById<Button>(R.id.btnReport)
-
             when (checker.getAlertMode()) {
                 FirstLaunchCheck.MODE_SOUND -> {
                     radioAlertModeGroup.check(R.id.radioSound)
@@ -310,20 +305,6 @@ class MainActivity : AppCompatActivity() {
 
                 else -> {
                     radioAlertModeGroup.check(R.id.radioSound)
-                }
-            }
-
-            when (checker.getDistanceMode()) {
-                FirstLaunchCheck.MODE_NEAR -> {
-                    radioDistanceModeGroup.check(R.id.radioNear)
-                }
-
-                FirstLaunchCheck.MODE_FAR -> {
-                    radioDistanceModeGroup.check(R.id.radioFar)
-                }
-
-                else -> {
-                    radioDistanceModeGroup.check(R.id.radioNear)
                 }
             }
 
@@ -349,22 +330,49 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+            //距離用SeekBar
+            val seekDistance = settingsView.findViewById<SeekBar>(
+                R.id.seekDistance
+            )
 
-            radioDistanceModeGroup.setOnCheckedChangeListener { _: RadioGroup, checkedId: Int ->
-                when (checkedId) {
-                    R.id.radioNear -> {
-                        checker.saveDistanceMode(
-                            FirstLaunchCheck.MODE_NEAR
-                        )
+            val textDistanceValue = settingsView.findViewById<TextView>(
+                R.id.textDistanceValue
+            )
+
+            val savedDistance = checker.getAlertDistance()
+
+            seekDistance.progress = savedDistance
+            textDistanceValue.text = "${savedDistance}m"
+
+            seekDistance.setOnSeekBarChangeListener(
+                object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(
+                        seekBar: SeekBar?,
+                        progress: Int,
+                        fromUser: Boolean
+                    ) {
+                        val distance = ((progress - 10) / 10) * 10 + 10
+
+                        if (fromUser && seekBar != null) {
+                            seekBar.progress = distance
+                        }
+                        textDistanceValue.text = "${distance}m"
+
+                        //保存
+                        checker.saveAlertDistance(distance)
                     }
 
-                    R.id.radioFar -> {
-                        checker.saveDistanceMode(
-                            FirstLaunchCheck.MODE_FAR
-                        )
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+                    }
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
                     }
                 }
-            }
+            )
+
+            val Btnmap = settingsView.findViewById<Button>(R.id.btnReport)
 
             Btnmap.setOnClickListener {
                 val intent = Intent (

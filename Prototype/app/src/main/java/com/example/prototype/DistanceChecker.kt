@@ -30,8 +30,10 @@ class DistanceChecker(private val context: Context) {
 
     var unStopSign = mutableListOf<String>()
 
+    val checker = FirstLaunchCheck(context)
+
     // この距離以内に入ったら警告を鳴らす
-    val detectDistance = 30f //接近を検知する距離
+    val detectDistance = checker.getAlertDistance() //接近を検知する距離
 
     // 前回計算した標識までの距離
     var previousDistance = -1f //
@@ -41,8 +43,6 @@ class DistanceChecker(private val context: Context) {
 
     // 現在対象になっている標識のID
     var targetUniqueKey: String = ""
-
-    private val checker = FirstLaunchCheck(context)
 
     private var mediaPlayer: MediaPlayer? = null //メディアプレイヤー
     private var vibrator: Vibrator? = null //バイブレーション
