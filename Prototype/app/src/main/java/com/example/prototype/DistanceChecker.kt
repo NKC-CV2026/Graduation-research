@@ -62,7 +62,7 @@ class DistanceChecker(context: Context) {
         //音声ファイル読み込み
         mediaPlayer = MediaPlayer.create(context,R.raw.alert_tsumugi)
         //ループ再生するように
-        mediaPlayer?.isLooping = true
+        mediaPlayer?.isLooping = false
         // バイブレーションを使えるようにする
         vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
