@@ -56,28 +56,52 @@
 
         <!-- 距離設定 -->
         <TextView
+            android:id="@+id/textDistanceTitle"
             android:text="通知距離"
             android:layout_marginTop="24dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <RadioGroup
-            android:id="@+id/radioDistanceModeGroup"
+        <TextView
+            android:id="@+id/textDistanceValue"
+            android:text="100m"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"/>
 
-            <RadioButton
-                android:id="@+id/radioNear"
-                android:text="近い"
-                android:layout_width="wrap_content"
+        <SeekBar
+            android:id="@+id/seekDistance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:min="20"
+            android:max="100"
+            android:progress="100"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/textDistanceMin"
+                android:text="20m"
+                android:gravity="start"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"/>
 
-            <RadioButton
-                android:id="@+id/radioFar"
-                android:text="遠い"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </RadioGroup>
+            <TextView
+                android:id="@+id/textDistanceMax"
+                android:text="100m"
+                android:gravity="end"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+
+        </LinearLayout>
+
 
         <Button
             android:id="@+id/btnReport"

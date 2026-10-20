@@ -56,31 +56,38 @@ class FirstLaunchCheck(context: Context) {
         ) ?: MODE_SOUND
     }
 
-    fun saveDistanceMode(mode: String) {
+    fun saveAlertDistance(distance: Int) {
         prefs.edit {
-            putString(
-                KEY_DISTANCE_MODE,
-                mode
+            putInt(
+                KEY_ALERT_DISTANCE,
+                distance
             )
+                .apply()
         }
     }
 
-    fun getDistanceMode(): String {
-        return prefs.getString(
-                KEY_DISTANCE_MODE,
-                MODE_NEAR
-        ) ?: MODE_SOUND
+    fun getAlertDistance(): Int {
+        return try {
+            prefs.getInt(KEY_ALERT_DISTANCE, 100)
+        } catch (e: ClassCastException) {
+            // 過去に文字列として保存された値を削除
+            prefs.edit()
+                .remove(KEY_ALERT_DISTANCE)
+                .apply()
+
+            // 初期値100mを返す
+            100
+        }
     }
 
     companion object {
         private const val KEY_FIRST_LAUNCH = "first_launch"
         private const val KEY_ALERT_MODE = "alert_mode"
-        private const val KEY_DISTANCE_MODE = "distance_mode"
+        private const val KEY_ALERT_DISTANCE = "distance_mode"
 
         const val MODE_SOUND = "sound"
         const val MODE_VIBRATION = "vibration"
         const val MODE_BOTH = "both"
-        const val MODE_NEAR = "near"
-        const val MODE_FAR = "far"
+        const val DEFAULT_DISTANCE = 100
     }
 }
