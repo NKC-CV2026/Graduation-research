@@ -22,16 +22,18 @@ class NearStopSign() {
         try {
 //            val url =
 //                URL("https://etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300") //誤URL
-//            val url = URL("https://8etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300")
-//            val inputString = url.readText()
-            val inputjson = context.resources.openRawResource( R.raw.test)
-            val inputString = inputjson.bufferedReader().use { it.readText() }
+            val url = URL("https://8etztd7m61.execute-api.ap-northeast-3.amazonaws.com/api/v1/stop-points?lat=$lat&long=$long&radius=300")
+//            Log.e("URLcheck","$url")
+            val inputString = url.readText()
+//            val inputjson = context.resources.openRawResource( R.raw.test)
+//            val inputString = inputjson.bufferedReader().use { it.readText() }
             if (!inputString.isEmpty()) {
                 val inputArray = JSONArray(inputString)
                 // 前回のデータが残らないように一度空にする
                 stopPoints.clear()
                 for (i in 0..<inputArray.length()) {
                     val obj = inputArray.getJSONObject(i)
+                    if (obj.getString("uniqueKey") != null && obj.optDouble("long",-1.0) != -1.0 && obj.optDouble("lat",-1.0) != -1.0 && obj.optInt("az",-1) != -1){
                     stopPoints.add(
                         mapOf(
                             "uniqueKey" to obj.getString("uniqueKey"), // 標識を識別するID
@@ -40,10 +42,11 @@ class NearStopSign() {
                             "bearing" to obj.getInt("az") // 標識の進入方向
                         )
                     )
+                        }
                 }
             }
         } catch (e: Exception) {
-            Log.e("test", "通信エラー")
+            Log.e("test", "通信エラー",e)
         }
 
     }

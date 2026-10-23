@@ -93,8 +93,8 @@ class MapActivity : AppCompatActivity() {
             136.91242805166993
         )
         //テスト用データ挿入
-        distanceChecker.unStopSign.add("23202602018069700000000003048802")
-        distanceChecker.unStopSign.add("23202602018070000000000003049108")
+//        distanceChecker.unStopSign.add("23202602018069700000000003048802")
+//        distanceChecker.unStopSign.add("23202602018070000000000003049108")
         lifecycleScope.launch {
             //マーカーを追加する処理
             if (distanceChecker.unStopSign.isEmpty()) {
