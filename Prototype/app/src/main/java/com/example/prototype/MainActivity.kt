@@ -150,5 +150,162 @@ class MainActivity : AppCompatActivity() {
 >>>>>>> Stashed changes
             }
         }
+<<<<<<< Updated upstream
     }
 }
+=======
+
+
+        // レポート画面へ遷移
+        binding.btnReport.setOnClickListener {
+            Log.e("btncheack","クリック")
+            showReportDialog()
+//            val intent = Intent(
+//                this,
+//                ReportActivity::class.java
+//            )
+////            intent.putExtra("STOP_SUCCSES_COUNT",distanceChecker.stopSuccsesCount)
+////            intent.putExtra("STOP_POINTS_COUNT",distanceChecker.stopPointsCount)
+//            startActivity(intent)
+        }
+
+        // 設定ダイアログ表示
+        binding.btnSettings.setOnClickListener {
+            val settingsView =layoutInflater.inflate(
+                R.layout.activity_setting,
+                null
+            )
+            val dialog = AlertDialog.Builder(this)
+                .setView(settingsView)
+                .create()
+
+            //アラート用RadioGroup
+            val radioAlertModeGroup = settingsView.findViewById<RadioGroup>(
+                R.id. radioAlertModeGroup
+            )
+
+            when (checker.getAlertMode()) {
+                FirstLaunchCheck.MODE_SOUND -> {
+                    radioAlertModeGroup.check(R.id.radioSound)
+                }
+
+                FirstLaunchCheck.MODE_VIBRATION -> {
+                    radioAlertModeGroup.check(R.id.radioVibration)
+                }
+
+                FirstLaunchCheck.MODE_BOTH -> {
+                    radioAlertModeGroup.check(R.id.radioBoth)
+                }
+
+                else -> {
+                    radioAlertModeGroup.check(R.id.radioSound)
+                }
+            }
+
+            radioAlertModeGroup.setOnCheckedChangeListener { _: RadioGroup, checkedId: Int ->
+                when (checkedId) {
+                    R.id.radioSound -> {
+                        checker.saveAlertMode(
+                            FirstLaunchCheck.MODE_SOUND
+                        )
+                    }
+
+                    R.id.radioVibration -> {
+                        checker.saveAlertMode(
+                            FirstLaunchCheck.MODE_VIBRATION
+                        )
+                    }
+
+                    R.id.radioBoth -> {
+                        checker.saveAlertMode(
+                            FirstLaunchCheck.MODE_BOTH
+                        )
+                    }
+                }
+            }
+
+            //距離用SeekBar
+            val seekDistance = settingsView.findViewById<SeekBar>(
+                R.id.seekDistance
+            )
+
+            val textDistanceValue = settingsView.findViewById<TextView>(
+                R.id.textDistanceValue
+            )
+
+            val savedDistance = checker.getAlertDistance()
+
+            seekDistance.progress = savedDistance
+            textDistanceValue.text = "${savedDistance}m"
+
+            seekDistance.setOnSeekBarChangeListener(
+                object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(
+                        seekBar: SeekBar?,
+                        progress: Int,
+                        fromUser: Boolean
+                    ) {
+                        val distance = ((progress - 10) / 10) * 10 + 10
+
+                        if (fromUser && seekBar != null) {
+                            seekBar.progress = distance
+                        }
+                        textDistanceValue.text = "${distance}m"
+
+                        //保存
+                        checker.saveAlertDistance(distance)
+                    }
+
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {
+
+                    }
+
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {
+
+                    }
+                }
+            )
+
+            dialog.show()
+        }
+
+    }
+
+    // レポートダイアログを表示
+    private fun showReportDialog() {
+        val reportView = layoutInflater.inflate(R.layout.dialog_report, null)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(reportView)
+            .create()
+
+        val pref = getSharedPreferences("report", MODE_PRIVATE)
+        val stopSuccessCount = pref.getInt("STOP_SUCCESS_COUNT", 0)
+        val stopPointsCount = pref.getInt("STOP_POINTS_COUNT", 0)
+
+        val txtReport = reportView.findViewById<TextView>(R.id.txtReport)
+        txtReport.text =
+            "一時停止した回数：${stopSuccessCount}回\n" +
+                    "一時停止総数：${stopPointsCount}回"
+
+        // 地図画面を開く
+        val btnReport = reportView.findViewById<Button>(R.id.btnReport)
+        btnReport.setOnClickListener {
+            val intent = Intent(this, MapActivity::class.java)
+            startActivity(intent)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    // Activity終了時に位置情報取得を停止する
+    override fun onDestroy() {
+        super.onDestroy()
+        locationGetter.stopLocationonUpdate()
+        // 停止
+//        distanceChecker.stopChecking()
+    }
+}
+
+>>>>>>> Stashed changes
