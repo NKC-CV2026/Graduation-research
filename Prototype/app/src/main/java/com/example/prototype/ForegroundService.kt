@@ -104,7 +104,7 @@ class ForegroundService : Service() {
                     continue
                 }
                 if (lastUpdateLatitude == null || lastUpdateLongitude == null){
-                    nearStopSign.setStopPoints(this@ForegroundService,nowLat,nowLong)
+                    nearStopSign.setStopPoints(this@ForegroundService, nowLat,nowLong)
                     lastUpdateLatitude = nowLat
                     lastUpdateLongitude = nowLong
                 }else{
@@ -119,7 +119,7 @@ class ForegroundService : Service() {
                     )
 
                     if (results[0] >= 50f){
-                        nearStopSign.setStopPoints(this@ForegroundService,nowLat,nowLong)
+                        nearStopSign.setStopPoints(this@ForegroundService, nowLat,nowLong)
                         lastUpdateLatitude = nowLat
                         lastUpdateLongitude = nowLong
                     }

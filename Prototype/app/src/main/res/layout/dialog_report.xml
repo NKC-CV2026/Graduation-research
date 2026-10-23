@@ -20,10 +20,12 @@
         android:layout_height="wrap_content"/>
 
     <Button
-        android:id="@+id/btnClose"
-        android:text="閉じる"
-        android:layout_marginTop="16dp"
+        android:id="@+id/btnReport"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#FF9800"
+        android:text="不停止地点Map表示" />
+
 
 </LinearLayout>

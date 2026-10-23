@@ -268,13 +268,7 @@ class MainActivity : AppCompatActivity() {
         // レポート画面へ遷移
         binding.btnReport.setOnClickListener {
             Log.e("btncheack","クリック")
-            val intent = Intent(
-                this,
-                ReportActivity::class.java
-            )
-//            intent.putExtra("STOP_SUCCSES_COUNT",distanceChecker.stopSuccsesCount)
-//            intent.putExtra("STOP_POINTS_COUNT",distanceChecker.stopPointsCount)
-            startActivity(intent)
+            showReportDialog()
         }
 
         // 設定ダイアログ表示
@@ -374,21 +368,39 @@ class MainActivity : AppCompatActivity() {
                 }
             )
 
-            val Btnmap = settingsView.findViewById<Button>(R.id.btnReport)
-
-            Btnmap.setOnClickListener {
-                val intent = Intent (
-                    this,
-                    MapActivity::class.java
-                )
-
-                startActivity(intent)
-                dialog.dismiss()
-            }
             dialog.show()
         }
 
     }
+
+    // レポートダイアログを表示
+    private fun showReportDialog() {
+        val reportView = layoutInflater.inflate(R.layout.dialog_report, null)
+
+        val dialog = AlertDialog.Builder(this)
+            .setView(reportView)
+            .create()
+
+        val pref = getSharedPreferences("report", MODE_PRIVATE)
+        val stopSuccessCount = pref.getInt("STOP_SUCCESS_COUNT", 0)
+        val stopPointsCount = pref.getInt("STOP_POINTS_COUNT", 0)
+
+        val txtReport = reportView.findViewById<TextView>(R.id.txtReport)
+        txtReport.text =
+            "一時停止した回数：${stopSuccessCount}回\n" +
+                    "一時停止総数：${stopPointsCount}回"
+
+        // 地図画面を開く
+        val btnReport = reportView.findViewById<Button>(R.id.btnReport)
+        btnReport.setOnClickListener {
+            val intent = Intent(this, MapActivity::class.java)
+            startActivity(intent)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
     // Activity終了時に位置情報取得を停止する
     override fun onDestroy() {
         super.onDestroy()

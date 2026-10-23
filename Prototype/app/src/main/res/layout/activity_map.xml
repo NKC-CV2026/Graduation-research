@@ -39,8 +39,9 @@
         android:id="@+id/btnBack"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/backBtn"
-        android:layout_margin="20dp"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="40dp"/>
+        android:layout_margin="20dp"
+        android:layout_marginBottom="40dp"
+        android:backgroundTint="#FF9800"
+        android:text="@string/backBtn" />
 </FrameLayout>
