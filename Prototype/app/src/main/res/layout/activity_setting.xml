@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -27,6 +28,7 @@
             <RadioButton
                 android:id="@+id/radioSound"
                 android:text="@string/settings_soundTitle"
+                app:buttonTint="@color/radio_button_tint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
@@ -34,6 +36,7 @@
             <RadioButton
                 android:id="@+id/radioVibration"
                 android:text="@string/settings_vibrationTitle"
+                app:buttonTint="@color/radio_button_tint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
@@ -41,6 +44,7 @@
             <RadioButton
                 android:id="@+id/radioBoth"
                 android:text="@string/settings_bothTitle"
+                app:buttonTint="@color/radio_button_tint"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
@@ -52,6 +56,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:backgroundTint="#FF9800"
             android:text="テスト実行" />
 
         <!-- 距離設定 -->
@@ -102,13 +107,13 @@
 
         </LinearLayout>
 
-
-        <Button
-            android:id="@+id/btnReport"
-            android:text="レポート表示"
-            android:layout_marginTop="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+        <TextView
+            android:id="@+id/dataSource"
+            android:text="出典：日本道路交通情報センター（JARTIC）「交通規制情報」\nhttps://www.jartic.or.jp/service/opendata/"
+            android:layout_marginTop="42dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"/>
 
     </LinearLayout>
 </ScrollView>
