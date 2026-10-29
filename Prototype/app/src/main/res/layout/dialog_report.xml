@@ -15,7 +15,7 @@
 
     <TextView
         android:id="@+id/txtReport"
-        android:text="走行回数: 〇回\n一時停止: 〇回"
+        android:text="総一時停止数: 〇回\n一時停止した回数: 〇回"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
@@ -26,6 +26,14 @@
         android:layout_marginTop="16dp"
         android:backgroundTint="#FF9800"
         android:text="不停止地点Map表示" />
+
+    <Button
+        android:id="@+id/btnReport_test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#FF9800"
+        android:text="テスト用　データ入力" />
 
 
 </LinearLayout>

@@ -155,6 +155,7 @@ class MainActivity : AppCompatActivity() {
         locationGetter = LocationGetter(this)
         // DistanceChecker生成
         distanceChecker = DistanceChecker(this)
+
         nearStopSign = NearStopSign()
 //        nearStopSign.setStopPoints(this)
         // 監視開始・停止ボタン
@@ -375,6 +376,12 @@ class MainActivity : AppCompatActivity() {
 
     // レポートダイアログを表示
     private fun showReportDialog() {
+        //テスト用
+        getSharedPreferences("map_test", MODE_PRIVATE)
+            .edit()
+            .remove("testStopSigns")
+            .apply()
+
         val reportView = layoutInflater.inflate(R.layout.dialog_report, null)
 
         val dialog = AlertDialog.Builder(this)
@@ -387,11 +394,36 @@ class MainActivity : AppCompatActivity() {
 
         val txtReport = reportView.findViewById<TextView>(R.id.txtReport)
         txtReport.text =
-            "一時停止した回数：${stopSuccessCount}回\n" +
-                    "一時停止総数：${stopPointsCount}回"
+            "一時停止総数：${stopPointsCount}回\n" +
+            "一時停止しなかった回数：${stopPointsCount-stopSuccessCount}回\n" +
+            "一時停止した回数：${stopSuccessCount}回\n"
 
         // 地図画面を開く
         val btnReport = reportView.findViewById<Button>(R.id.btnReport)
+
+        //テスト用
+        val btnReportTest = reportView.findViewById<Button>(R.id.btnReport_test)
+
+        btnReportTest.isEnabled = true
+
+        btnReportTest.setOnClickListener {
+            val pref = getSharedPreferences("map_test", MODE_PRIVATE)
+            pref.edit()
+                .putStringSet(
+                    "testStopSigns",
+                    setOf(
+                        "23202602018069700000000003048802",
+                        "23202602018070000000000003049108"
+                    )
+                )
+                .apply()
+
+            btnReportTest.isEnabled = false
+            btnReportTest.backgroundTintList =
+                android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY)
+        }
+    //テスト用ここまで
+
         btnReport.setOnClickListener {
             val intent = Intent(this, MapActivity::class.java)
             startActivity(intent)
