@@ -15,7 +15,7 @@
 
     <TextView
         android:id="@+id/txtReport"
-        android:text="走行回数: 〇回\n一時停止: 〇回"
+        android:text="総一時停止数: 〇回\n一時停止した回数: 〇回"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 

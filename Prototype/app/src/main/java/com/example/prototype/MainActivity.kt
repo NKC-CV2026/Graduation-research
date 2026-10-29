@@ -387,8 +387,9 @@ class MainActivity : AppCompatActivity() {
 
         val txtReport = reportView.findViewById<TextView>(R.id.txtReport)
         txtReport.text =
-            "一時停止した回数：${stopSuccessCount}回\n" +
-                    "一時停止総数：${stopPointsCount}回"
+            "一時停止総数：${stopPointsCount}回\n" +
+            "一時停止しなかった回数：${stopPointsCount-stopSuccessCount}回\n" +
+            "一時停止した回数：${stopSuccessCount}回\n"
 
         // 地図画面を開く
         val btnReport = reportView.findViewById<Button>(R.id.btnReport)
