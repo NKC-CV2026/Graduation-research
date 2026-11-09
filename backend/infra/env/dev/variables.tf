@@ -91,7 +91,7 @@ variable "app_db_user" {
 variable "stop_point_dataset_id" {
   description = "Single embedded dataset ID selected by the dev API (rule-test is not production-safe)."
   type        = string
-  default     = "nagoya-rule-test-202602-v1"
+  default     = "external-stop-approach-test-202602-v2"
 
   validation {
     condition     = can(regex("^[a-z0-9][a-z0-9._-]{0,63}$", var.stop_point_dataset_id))
