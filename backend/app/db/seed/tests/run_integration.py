@@ -121,7 +121,7 @@ def main():
     scratch = tempfile.mkdtemp(prefix="seed-cli-", dir=db.tmp.parent)
     try:
         db.start()
-        for setup in ("CREATE ROLE rds_iam NOLOGIN", "CREATE DATABASE gr9_dev"):
+        for setup in ("CREATE ROLE rds_iam NOLOGIN", "CREATE DATABASE gr9_dev", "CREATE DATABASE gr9_upgrade"):
             created = db.sql(setup, database="postgres")
             assert created.returncode == 0, created.stderr
         for migration in MIGRATIONS:
@@ -333,7 +333,11 @@ def main():
             Path(scratch).rmdir()
         except OSError:
             pass
-    print(json.dumps(summary))
+    rendered_summary = json.dumps(summary, sort_keys=True)
+    if args.log:
+        with args.log.open("a") as log:
+            log.write("\nIntegration summary:\n" + rendered_summary + "\n")
+    print(rendered_summary)
     sys.exit(0 if summary["passed"] and summary["database_stopped"] else 1)
 
 

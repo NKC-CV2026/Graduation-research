@@ -33,6 +33,13 @@ class MapActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         distanceChecker = DistanceChecker(this)
+
+        //テスト用
+        val pref = getSharedPreferences("map_test", MODE_PRIVATE)
+        val testStopSigns = pref.getStringSet("testStopSigns", emptySet()) ?: emptySet()
+        distanceChecker.unStopSign.addAll(testStopSigns)
+        //テスト用ここまで
+
         //osmdroid設定
         Configuration.getInstance()
             .load(
@@ -91,7 +98,7 @@ class MapActivity : AppCompatActivity() {
             35.12574345899065,
             136.91242805166993
         )
-        //テスト用データ挿入
+//        //テスト用データ挿入
 //        distanceChecker.unStopSign.add("23202602018069700000000003048802")
 //        distanceChecker.unStopSign.add("23202602018070000000000003049108")
         lifecycleScope.launch {
