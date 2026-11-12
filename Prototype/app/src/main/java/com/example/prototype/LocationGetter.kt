@@ -43,7 +43,7 @@ class LocationGetter(
                     lat = location.latitude
                     preLong = long
                     long = location.longitude
-                    bearing = if(preLat != null || preLong != null){
+                    bearing = if(preLat != null && preLong != null){
                         setBearing(preLat!!,preLong!!,lat!!,long!!)
                     }else{
                         location.bearing

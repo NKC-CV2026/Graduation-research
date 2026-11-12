@@ -1,3 +1,5 @@
+// 非同期foreground
+
 package com.example.prototype
 
 import android.app.Notification
@@ -104,7 +106,7 @@ class ForegroundService : Service() {
                     continue
                 }
                 if (lastUpdateLatitude == null || lastUpdateLongitude == null){
-                    nearStopSign.setStopPoints(this@ForegroundService, nowLat,nowLong)
+                    nearStopSign.setStopPoints(nowLat,nowLong)
                     lastUpdateLatitude = nowLat
                     lastUpdateLongitude = nowLong
                 }else{
@@ -119,17 +121,17 @@ class ForegroundService : Service() {
                     )
 
                     if (results[0] >= 50f){
-                        nearStopSign.setStopPoints(this@ForegroundService, nowLat,nowLong)
+                        nearStopSign.setStopPoints(nowLat,nowLong)
+//                        nearStopSign.setStopPoints(nowLat,nowLong)
                         lastUpdateLatitude = nowLat
                         lastUpdateLongitude = nowLong
                     }
                 }
                 // 現在地・進行方向から最も適切な一時停止標識を検索
-                val nearStop = nearStopSign.matchStopSing(
+                val nearStop = nearStopSign.matchStopSign(
                     nowLat,
                     nowLong,
-                    nowBearing,
-                    nearStopSign.stopPoints
+                    nowBearing
                 )
                 // 対象標識が見つからなかった場合は次のループへ
                 if (nearStop == null) {
@@ -137,17 +139,18 @@ class ForegroundService : Service() {
                     continue
                 }
                 // 現在対象になっている標識のuniqueKeyを表示
-                Log.e("test","${nearStop["uniqueKey"]}")
+                Log.e("test", nearStop.uniqueKey)
                 // 前回と違う標識を検知した場合
-                if (lastUniqueKey != nearStop["uniqueKey"].toString()){
+
+                if (lastUniqueKey != nearStop.uniqueKey){
                     distanceChecker.isChecks = true     // 新しい標識として判定を有効化
                     distanceChecker.previousDistance = -1f      // 前回距離を初期化
-                    lastUniqueKey = nearStop["uniqueKey"].toString()    // 今回の標識を保存
+                    lastUniqueKey = nearStop.uniqueKey    // 今回の標識を保存
                 }
                 // DistanceCheckerへ標識情報を渡す
-                distanceChecker.targetLatitude = nearStop["lat"] as Double
-                distanceChecker.targetLongitude = nearStop["long"] as Double
-                distanceChecker.targetUniqueKey = nearStop["uniqueKey"].toString()
+                distanceChecker.targetLatitude = nearStop.lat
+                distanceChecker.targetLongitude = nearStop.long
+                distanceChecker.targetUniqueKey = nearStop.uniqueKey
                 // DistanceCheckerへ現在地情報を渡す
                 distanceChecker.nowLatitude = nowLat
                 distanceChecker.nowLongtitude = nowLong
@@ -175,7 +178,7 @@ class ForegroundService : Service() {
         // レポート表示用に、一時停止結果を端末内へ保存する
         prefs.edit {
             putInt(
-                "STOP_SUCCSES_COUNT", distanceChecker.stopSuccsesCount
+                "STOP_SUCCESS_COUNT", distanceChecker.stopSuccessCount
             )
             putInt(
                 "STOP_POINTS_COUNT", distanceChecker.stopPointsCount
@@ -225,4 +228,6 @@ class ForegroundService : Service() {
             1
     }
 }
+
+
 
