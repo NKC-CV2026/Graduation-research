@@ -12,7 +12,7 @@ import android.os.VibrationEffect
 // 音声・バイブ通知と一時停止回数のカウントを行うクラス
 class DistanceChecker(context: Context) {
     // 一時停止できた回数
-    var stopSuccsesCount = 0
+    var stopSuccessCount = 0
 
     // 通過した一時停止標識の回数
     var stopPointsCount = 0
@@ -58,7 +58,7 @@ class DistanceChecker(context: Context) {
     //クラス生成時に自動実行
     init {
 ////        停止回数生成
-//        stopSuccsesCount = 0
+//        stopSuccessCount = 0
         //音声ファイル読み込み
         mediaPlayer = MediaPlayer.create(context,R.raw.alert_tsumugi)
         //ループ再生するように
@@ -121,7 +121,7 @@ class DistanceChecker(context: Context) {
 //                isChecks = false
                 // 速度が5以下なら一時停止成功としてカウントする (現在はテスト用の値。本番ではもっと低い値にする予定)
                 if (nowSpeed <= 5f){
-                    stopSuccsesCount++
+                    stopSuccessCount++
                     unStopSign.remove(targetUniqueKey)
                     Log.d("test","一時停止")
                 }

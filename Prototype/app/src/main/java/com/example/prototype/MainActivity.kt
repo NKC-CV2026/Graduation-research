@@ -164,7 +164,7 @@ class MainActivity : AppCompatActivity() {
             isMonitoring = !isMonitoring
             // 監視開始時の処理
             if (isMonitoring){
-//                distanceChecker.stopSuccsesCount = 0
+//                distanceChecker.stopSuccesCount = 0
 //                distanceChecker.stopPointsCount = 0
                 if (ActivityCompat.checkSelfPermission(
                         this,
@@ -257,7 +257,7 @@ class MainActivity : AppCompatActivity() {
                 )
                 binding.locationBtn.text = getString(R.string.btn_offLocation)
                 binding.statusText.text = getString(R.string.status_off)
-//                Log.e("test","停止した一時停止${distanceChecker.stopSuccsesCount}")
+//                Log.e("test","停止した一時停止${distanceChecker.stopSuccesCount}")
 //                Log.e("test","接近した一時停止${distanceChecker.stopPointsCount}")
                 // 距離判定停止
 //                distanceChecker.stopChecking()
@@ -391,7 +391,8 @@ class MainActivity : AppCompatActivity() {
         val pref = getSharedPreferences("report", MODE_PRIVATE)
         val stopSuccessCount = pref.getInt("STOP_SUCCESS_COUNT", 0)
         val stopPointsCount = pref.getInt("STOP_POINTS_COUNT", 0)
-
+        Log.d("check","${stopSuccessCount}")
+        Log.d("check","${stopPointsCount}")
         val txtReport = reportView.findViewById<TextView>(R.id.txtReport)
         txtReport.text =
             "一時停止総数：${stopPointsCount}回\n" +
