@@ -10,7 +10,7 @@ import android.os.VibrationEffect
 
 // 選ばれた一時停止標識との距離を確認
 // 音声・バイブ通知と一時停止回数のカウントを行うクラス
-class DistanceChecker(context: Context) {
+class DistanceChecker(private val context: Context) {
     // 一時停止できた回数
     var stopSuccessCount = 0
 
@@ -115,18 +115,20 @@ class DistanceChecker(context: Context) {
                 "key=$targetUniqueKey distance=$distance speed=$nowSpeed"
             )
             // 標識から10m以内に入ったら、通過対象としてカウントする
-            if (distance <= 10f){
+            if (distance <= 10f) {
                 stopPointsCount++
                 unStopSign.add(targetUniqueKey)
-//                isChecks = false
-                // 速度が5以下なら一時停止成功としてカウントする (現在はテスト用の値。本番ではもっと低い値にする予定)
-                if (nowSpeed <= 5f){
+
+                if (nowSpeed <= 5f) {
                     stopSuccessCount++
                     unStopSign.remove(targetUniqueKey)
-                    Log.d("test","一時停止")
+                    Log.d("test", "一時停止")
                 }
-                // 同じ標識で何度もカウントしないようにする
+
                 isChecks = false
+
+                // 判定した時点でデータを保存
+                saveReport()
             }
             Log.d("DistanceCheck", "接近しました！")
 
@@ -203,5 +205,29 @@ class DistanceChecker(context: Context) {
 //    fun stopChecking() {
 //        handler.removeCallbacks(checkRunnable)
 //    }
+// 停止判定の結果を端末に保存する
+    private fun saveReport() {
+        val prefs = context.getSharedPreferences(
+            "report",
+            Context.MODE_PRIVATE
+        )
+
+        val saved = prefs.edit()
+            .putInt("STOP_SUCCESS_COUNT", stopSuccessCount)
+            .putInt("STOP_POINTS_COUNT", stopPointsCount)
+            .putStringSet("UN_STOP_SIGNS", unStopSign.toSet())
+            .commit()
+
+        Log.d("STOP_DEBUG", "保存成功: $saved")
+    }
+
+    // 音声とバイブレーションを終了する
+    fun release() {
+        mediaPlayer?.release()
+        mediaPlayer = null
+
+        vibrator?.cancel()
+        vibrator = null
+    }
 }
 
