@@ -34,9 +34,22 @@ class MapActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         distanceChecker = DistanceChecker(this)
 
+
+        // 実際の未停止地点
+        val reportPref = getSharedPreferences("report", MODE_PRIVATE)
+        val unStopSigns =
+            reportPref.getStringSet("UN_STOP_SIGNS", emptySet()) ?: emptySet()
+
+        distanceChecker.unStopSign.addAll(unStopSigns)
+
         //テスト用
-        val pref = getSharedPreferences("map_test", MODE_PRIVATE)
-        val testStopSigns = pref.getStringSet("testStopSigns", emptySet()) ?: emptySet()
+        val testPref = getSharedPreferences("map_test", MODE_PRIVATE)
+        val testStopSigns =
+            testPref.getStringSet("testStopSigns", emptySet()) ?: emptySet()
+
+        // 読み込み確認
+        Log.d("STOP_DEBUG", "地図表示対象: ${distanceChecker.unStopSign}")
+
         distanceChecker.unStopSign.addAll(testStopSigns)
         //テスト用ここまで
 

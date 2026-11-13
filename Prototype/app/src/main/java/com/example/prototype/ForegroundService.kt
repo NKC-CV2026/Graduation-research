@@ -90,7 +90,7 @@ class ForegroundService : Service() {
         locationGetter.startLocationUpdate()
 
         // 位置情報取得と標識判定を繰り返す
-        serviceScope.launch {
+        monitoringJob = serviceScope.launch {
             while (isActive) {
                 // 現在地情報を取得
                 val nowLat = locationGetter.getLat()
@@ -183,8 +183,12 @@ class ForegroundService : Service() {
             putInt(
                 "STOP_POINTS_COUNT", distanceChecker.stopPointsCount
             )
+            putStringSet(
+                "UN_STOP_SIGNS", distanceChecker.unStopSign.toSet()
+            )
         }
         Log.e("test","${distanceChecker.unStopSign}")
+        Log.d("STOP_DEBUG", "保存した未停止地点: ${distanceChecker.unStopSign}")
         // GPS取得停止
         locationGetter.stopLocationonUpdate()
         // Coroutine停止
