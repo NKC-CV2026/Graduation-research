@@ -403,26 +403,26 @@ class MainActivity : AppCompatActivity() {
         val btnReport = reportView.findViewById<Button>(R.id.btnReport)
 
         //テスト用
-        val btnReportTest = reportView.findViewById<Button>(R.id.btnReport_test)
-
-        btnReportTest.isEnabled = true
-
-        btnReportTest.setOnClickListener {
-            val pref = getSharedPreferences("map_test", MODE_PRIVATE)
-            pref.edit()
-                .putStringSet(
-                    "testStopSigns",
-                    setOf(
-                        "23202602018069700000000003048802",
-                        "23202602018070000000000003049108"
-                    )
-                )
-                .apply()
-
-            btnReportTest.isEnabled = false
-            btnReportTest.backgroundTintList =
-                android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY)
-        }
+//        val btnReportTest = reportView.findViewById<Button>(R.id.btnReport_test)
+//
+//        btnReportTest.isEnabled = true
+//
+//        btnReportTest.setOnClickListener {
+//            val pref = getSharedPreferences("map_test", MODE_PRIVATE)
+//            pref.edit()
+//                .putStringSet(
+//                    "testStopSigns",
+//                    setOf(
+//                        "23202602018069700000000003048802",
+//                        "23202602018070000000000003049108"
+//                    )
+//                )
+//                .apply()
+//
+//            btnReportTest.isEnabled = false
+//            btnReportTest.backgroundTintList =
+//                android.content.res.ColorStateList.valueOf(android.graphics.Color.GRAY)
+//        }
     //テスト用ここまで
 
         btnReport.setOnClickListener {
