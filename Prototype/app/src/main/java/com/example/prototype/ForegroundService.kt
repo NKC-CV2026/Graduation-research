@@ -84,7 +84,7 @@ class ForegroundService : Service() {
         // 既に監視中なら新しく開始しない
         if (monitoringJob?.isActive == true) {
             Log.d("ForegroundService", "すでに監視中です")
-            return START_STICKY
+            return START_NOT_STICKY
         }
         // GPSによる位置情報取得開始
         locationGetter.startLocationUpdate()
@@ -164,39 +164,97 @@ class ForegroundService : Service() {
                 delay(1000L)
             }
         }
-        return START_STICKY
+        return START_NOT_STICKY
+    }
+
+    // タスク一覧からアプリが削除された場合
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        Log.d("ForegroundService", "タスクキルを検知しました")
+
+        stopSelf()
+
+        super.onTaskRemoved(rootIntent)
     }
 
     // サービス終了時にレポートデータを保存する
     override fun onDestroy() {
-        super.onDestroy()
-        // SharedPreferencesへ結果を保存
-        val prefs = getSharedPreferences(
-            "report"
-            ,MODE_PRIVATE
-        )
-        // レポート表示用に、一時停止結果を端末内へ保存する
-        prefs.edit {
-            putInt(
-                "STOP_SUCCESS_COUNT", distanceChecker.stopSuccessCount
-            )
-            putInt(
-                "STOP_POINTS_COUNT", distanceChecker.stopPointsCount
-            )
-            putStringSet(
-                "UN_STOP_SIGNS", distanceChecker.unStopSign.toSet()
-            )
-        }
-        Log.e("test","${distanceChecker.unStopSign}")
-        Log.d("STOP_DEBUG", "保存した未停止地点: ${distanceChecker.unStopSign}")
+
+        // Coroutine停止
+        monitoringJob?.cancel()
+        serviceScope.cancel()
+
         // GPS取得停止
         locationGetter.stopLocationonUpdate()
-        // Coroutine停止
-        serviceScope.cancel()
+
+        // 音声・バイブレーション停止
+        distanceChecker.release()
+
+        // SharedPreferencesへ結果を保存
+        val prefs = getSharedPreferences("report", MODE_PRIVATE)
+
+        prefs.edit {
+            putInt(
+                "STOP_SUCCESS_COUNT",
+                distanceChecker.stopSuccessCount
+            )
+            putInt(
+                "STOP_POINTS_COUNT",
+                distanceChecker.stopPointsCount
+            )
+            putStringSet(
+                "UN_STOP_SIGNS",
+                distanceChecker.unStopSign.toSet()
+            )
+        }
+
+        Log.d(
+            "STOP_DEBUG",
+            "保存した未停止地点: ${distanceChecker.unStopSign}"
+        )
+
+        // フォアグラウンド通知を削除
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
+        } else {
+            @Suppress("DEPRECATION")
+            stopForeground(true)
+        }
+
+        Log.d("ForegroundService", "監視を終了しました")
+
+        super.onDestroy()
+//        super.onDestroy()
+//        // SharedPreferencesへ結果を保存
+//        val prefs = getSharedPreferences(
+//            "report"
+//            ,MODE_PRIVATE
+//        )
+//        // レポート表示用に、一時停止結果を端末内へ保存する
+//        prefs.edit {
+//            putInt(
+//                "STOP_SUCCESS_COUNT", distanceChecker.stopSuccessCount
+//            )
+//            putInt(
+//                "STOP_POINTS_COUNT", distanceChecker.stopPointsCount
+//            )
+//            putStringSet(
+//                "UN_STOP_SIGNS", distanceChecker.unStopSign.toSet()
+//            )
+//        }
+//        Log.e("test","${distanceChecker.unStopSign}")
+//        Log.d("STOP_DEBUG", "保存した未停止地点: ${distanceChecker.unStopSign}")
+//        // GPS取得停止
+//        locationGetter.stopLocationonUpdate()
+//        // Coroutine停止
+//        serviceScope.cancel()
+//    }
+//
+//    // バインド型サービスではないため使用しない
+//    // Activityから直接通信するサービスではないので使っていない
+//    override fun onBind(intent: Intent?): IBinder? {
+//        return null
     }
 
-    // バインド型サービスではないため使用しない
-    // Activityから直接通信するサービスではないので使っていない
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
